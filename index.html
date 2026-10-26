@@ -235,8 +235,87 @@ mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width:
 .card .status { font-family: var(--f-mono); font-size: 0.72rem; color: var(--ink-2); }
 .card .status.done { color: var(--good); }
 
+/* community */
+.community { padding-block: 10px 56px; }
+.clist { display: flex; flex-direction: column; gap: 10px; }
+.ccard { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; min-width: 0; }
+.ccard summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.ccard summary::-webkit-details-marker { display: none; }
+.ccard summary .ttl { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; line-height: 1.25; flex: 1 1 260px; min-width: 0; }
+.ccard[open] summary { border-bottom: 1px dashed var(--rule); }
+.ccard .cbody { padding: 14px 16px 4px; }
+.ccard .cbody p { white-space: pre-line; overflow-wrap: anywhere; }
+.byline { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink-2); }
+.review { border: 1.5px dashed var(--math); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 10px; }
+.empty { color: var(--ink-2); margin: 0; }
+
+/* dialogs and forms */
+dialog {
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--card); color: var(--ink); padding: 0;
+  width: min(580px, calc(100vw - 32px)); max-height: calc(100dvh - 48px);
+  box-shadow: 0 24px 60px -20px rgba(5, 15, 35, 0.6);
+}
+dialog::backdrop { background: rgba(8, 20, 40, 0.55); }
+.dlg-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--card); z-index: 1;
+}
+.dlg-head h2 { font-size: 1.25rem; }
+.dlg-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.dlg-body h3 { font-size: 1.02rem; margin-bottom: -6px; }
+.x { border: 0; background: transparent; font-size: 1.5rem; line-height: 1; padding: 2px 8px; color: var(--ink-2); }
+.form { display: flex; flex-direction: column; gap: 12px; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-family: var(--f-display); font-weight: 500; font-size: 0.95rem; }
+.form input:not([type="radio"]), .form select, .form textarea {
+  font-family: var(--f-body); font-size: 1rem; color: var(--ink); background: var(--paper);
+  border: 1.5px solid var(--rule); border-radius: 6px; padding: 9px 12px; width: 100%;
+}
+.form textarea { min-height: 150px; resize: vertical; }
+.form fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 16px; flex-wrap: wrap; }
+.form fieldset legend { margin-bottom: 6px; padding: 0; }
+.form .radio { flex-direction: row; align-items: center; gap: 6px; }
+.form .radio input { accent-color: var(--ink); }
+.form .btn { align-self: flex-start; }
+.form .btn:disabled { opacity: 0.6; cursor: progress; }
+.hint { font-size: 0.86rem; color: var(--ink-2); margin: 0; }
+.msg { margin: 0; font-size: 0.95rem; }
+.msg:empty { display: none; }
+.msg.err { color: var(--bad); }
+.msg.ok { color: var(--good); }
+
+/* profile */
+.who { display: flex; flex-direction: column; gap: 2px; }
+.who b { font-family: var(--f-display); font-size: 1.3rem; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; background: var(--paper); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tile b { font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; }
+.days i { aspect-ratio: 1; border-radius: 3px; background: var(--rule); }
+.days i.on { background: var(--good); }
+.days i.today { outline: 2px solid var(--ink); outline-offset: 1px; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; padding: 8px 0; border-bottom: 1px dashed var(--rule); font-size: 0.95rem; }
+.rows li:last-child { border-bottom: 0; }
+.rows .num { font-family: var(--f-mono); font-size: 0.8rem; white-space: nowrap; text-align: right; display: flex; gap: 8px; align-items: center; }
+.linkish { border: 0; background: transparent; padding: 0; text-align: left; font-family: var(--f-display); font-weight: 500; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.linkish:hover { text-decoration-color: currentColor; }
+.badge { font-family: var(--f-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 3px; border: 1px solid currentColor; }
+.badge.pending { color: var(--ink-2); }
+.badge.approved { color: var(--good); }
+.badge.rejected { color: var(--bad); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 20;
+  background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 6px;
+  width: max-content; max-width: calc(100vw - 32px); font-size: 0.95rem;
+  box-shadow: 0 14px 30px -14px rgba(5, 15, 35, 0.6);
+}
+
 footer { border-top: 1px solid var(--rule); padding-block: 20px 36px; color: var(--ink-2); font-size: 0.9rem; }
 
+@media (max-width: 520px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 820px) {
   .hero { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   .timeline li { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; }
@@ -254,6 +333,7 @@ footer { border-top: 1px solid var(--rule); padding-block: 20px 36px; color: var
       <div class="stat"><span class="label">Streak</span><b id="streak">1 day</b></div>
       <div class="stat"><span class="label">Quizzes passed</span><b id="passed">0 / 14</b></div>
       <div class="stat"><span class="label">Next fact in</span><b id="countdown">--</b></div>
+      <button class="chip" id="acct-btn" hidden>Sign in</button>
     </div>
   </header>
 
@@ -316,11 +396,64 @@ footer { border-top: 1px solid var(--rule); padding-block: 20px 36px; color: var
     <div class="grid" id="grid"></div>
   </section>
 
+  <section class="community" id="community" hidden>
+    <div class="coll-head">
+      <div>
+        <div class="label">From readers</div>
+        <h2>Community facts</h2>
+      </div>
+      <div class="filters" id="c-filters">
+        <button class="chip" id="cf-fact" data-cf="fact" aria-pressed="true">Facts</button>
+        <button class="chip" id="cf-topic" data-cf="topic" aria-pressed="false">Topic ideas</button>
+        <button class="btn" id="go-submit">Submit a fact or topic</button>
+      </div>
+    </div>
+    <div class="review" id="review" hidden>
+      <div class="label">Review queue · only admins see this</div>
+      <div class="clist" id="review-list"></div>
+    </div>
+    <div class="clist" id="clist"></div>
+  </section>
+
   <footer>
-    A new fact unlocks at local midnight and the collection rotates through physics and mathematics. Your streak and quiz scores are kept in this browser only. Paper links point to the publisher's DOI page where one exists; every paper also has a Google Scholar search link to find a free copy.
+    A new fact unlocks at local midnight and the collection rotates through physics and mathematics. <span id="f-store">Your streak and quiz scores are kept in this browser only.</span> Paper links point to the publisher's DOI page where one exists; every paper also has a Google Scholar search link to find a free copy.
   </footer>
 </div>
 
+<dialog id="acct-dlg" aria-labelledby="acct-title">
+  <div class="dlg-head"><h2 id="acct-title">Your account</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="dlg-body" id="acct-body"></div>
+</dialog>
+
+<dialog id="submit-dlg" aria-labelledby="submit-title">
+  <div class="dlg-head"><h2 id="submit-title">Submit to the collection</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <form class="form dlg-body" id="submit-form">
+    <fieldset>
+      <legend class="label">What are you sending?</legend>
+      <label class="radio"><input type="radio" name="kind" value="fact" checked> A fact</label>
+      <label class="radio"><input type="radio" name="kind" value="topic"> A topic for a deep dive</label>
+    </fieldset>
+    <label>Field
+      <select name="field"><option>Physics</option><option>Mathematics</option></select>
+    </label>
+    <label>Title
+      <input name="title" required minlength="3" maxlength="120" placeholder="Bees can't see red">
+    </label>
+    <label><span id="s-body-label">The fact, in your own words</span>
+      <textarea name="body" required minlength="10" maxlength="2000"></textarea>
+    </label>
+    <label>Source link (optional)
+      <input name="source_url" type="url" maxlength="500" pattern="https?://.+" placeholder="https://doi.org/...">
+    </label>
+    <p class="hint">An editor reviews every submission before it's published. You can have up to 5 waiting at once.</p>
+    <p class="msg" role="status"></p>
+    <button class="btn" type="submit">Send for review</button>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const R = String.raw;
 
@@ -985,8 +1118,16 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem('eps:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('eps:' + k, JSON.stringify(v)); } catch {} }
+  set(k, v) { try { localStorage.setItem('eps:' + k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem('eps:' + k); } catch {} }
 };
+
+/* Supabase project settings (Project Settings → API). Leave blank to run without accounts. */
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
+const sb = SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 function dayNumber(d = new Date()) {
   return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(2026, 0, 1)) / 864e5);
@@ -994,22 +1135,55 @@ function dayNumber(d = new Date()) {
 const TODAY = dayNumber();
 const TODAY_ID = ORDER[((TODAY % ORDER.length) + ORDER.length) % ORDER.length];
 
-const state = { id: TODAY_ID, tab: 'explore', filter: store.get('filter', 'All'), answers: {} };
+const state = { id: TODAY_ID, tab: 'explore', filter: store.get('filter', 'All'), answers: {}, cfilter: 'fact', authMode: 'signin', authNote: '' };
 
 /* ---------- streak & progress ---------- */
-function recordVisit() {
-  const days = new Set(store.get('days', []));
-  days.add(TODAY);
-  const arr = [...days].sort((a, b) => a - b).slice(-400);
-  store.set('days', arr);
-  let streak = 0;
-  while (days.has(TODAY - streak)) streak++;
-  $('#streak').textContent = streak + (streak === 1 ? ' day' : ' days');
+// Signed in, progress mirrors the account; otherwise it lives in localStorage.
+const progress = { days: new Set(), scores: {} }; // scores[id] = { best, last, attempts }
+const account = { user: null, profile: null, mine: [] };
+
+function guestProgress() {
+  let scores = store.get('scores', null);
+  if (!scores) { // older versions kept only the best score under quiz:<id>
+    scores = {};
+    FACTS.forEach(f => { const b = store.get('quiz:' + f.id, null); if (b !== null) scores[f.id] = { best: b, last: b, attempts: 1 }; });
+  }
+  return { days: new Set(store.get('days', [])), scores };
 }
-function bestScore(id) { return store.get('quiz:' + id, null); }
+function clearGuestProgress() {
+  store.set('days', []); store.set('scores', {});
+  FACTS.forEach(f => store.del('quiz:' + f.id));
+}
+function sync(promise, what) {
+  promise.then(({ error }) => { if (error) toast("Couldn't save " + what + ': ' + error.message); });
+}
+function recordVisit() {
+  if (progress.days.has(TODAY)) return;
+  progress.days.add(TODAY);
+  if (account.user) sync(sb.from('visits').upsert({ user_id: account.user.id, day: TODAY }, { ignoreDuplicates: true }), 'your visit');
+  else store.set('days', [...progress.days].sort((a, b) => a - b).slice(-400));
+}
+function recordQuiz(id, correct) {
+  const prev = progress.scores[id];
+  progress.scores[id] = { best: Math.max(correct, prev ? prev.best : 0), last: correct, attempts: (prev ? prev.attempts : 0) + 1 };
+  if (!account.user) { store.set('scores', progress.scores); return; }
+  sb.rpc('record_quiz', { p_fact_id: id, p_score: correct }).then(({ data, error }) => {
+    if (error) toast("Couldn't save your score: " + error.message);
+    else progress.scores[id] = data;
+  });
+}
+function streakStats(days) {
+  let current = 0, longest = 0, run = 0, prev = -Infinity;
+  while (days.has(TODAY - current)) current++;
+  [...days].sort((a, b) => a - b).forEach(d => { run = d === prev + 1 ? run + 1 : 1; longest = Math.max(longest, run); prev = d; });
+  return { current, longest, total: days.size };
+}
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+function bestScore(id) { return progress.scores[id] ? progress.scores[id].best : null; }
+function passedCount() { return FACTS.filter(f => (bestScore(f.id) ?? -1) >= 2).length; }
 function renderProgress() {
-  const passed = FACTS.filter(f => (bestScore(f.id) ?? -1) >= 2).length;
-  $('#passed').textContent = passed + ' / ' + FACTS.length;
+  $('#streak').textContent = plural(streakStats(progress.days).current, 'day');
+  $('#passed').textContent = passedCount() + ' / ' + FACTS.length;
 }
 function tickCountdown() {
   const now = new Date();
@@ -1163,9 +1337,7 @@ function answer(qi, oi) {
   if (ans[qi] !== undefined) return;
   ans[qi] = oi;
   if (ans.filter(a => a !== undefined).length === f.quiz.length) {
-    const correct = ans.filter((a, i) => a === f.quiz[i].a).length;
-    const prev = bestScore(f.id);
-    if (prev === null || correct > prev) store.set('quiz:' + f.id, correct);
+    recordQuiz(f.id, ans.filter((a, i) => a === f.quiz[i].a).length);
     renderProgress(); renderGrid(); renderHero();
   }
   renderQuiz();
@@ -1189,6 +1361,242 @@ function renderGrid() {
     }).join('');
 }
 
+/* ---------- accounts ---------- */
+let toastTimer = null;
+function toast(text) {
+  const el = $('#toast');
+  el.hidden = false; el.textContent = text;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 4500);
+}
+
+let loadSeq = 0;
+async function loadAccount(user) {
+  const seq = ++loadSeq;
+  account.user = user; account.profile = null; account.mine = [];
+  if (user) {
+    const [p, v, q, m] = await Promise.all([
+      sb.from('profiles').select('username,is_admin,created_at').eq('id', user.id).maybeSingle(),
+      sb.from('visits').select('day').eq('user_id', user.id).order('day', { ascending: false }).limit(1000),
+      sb.from('quiz_scores').select('fact_id,best,last,attempts').eq('user_id', user.id),
+      sb.from('submissions').select('id,kind,title,status,created_at').eq('user_id', user.id).order('created_at', { ascending: false })
+    ]);
+    if (seq !== loadSeq) return;
+    const failed = [p, v, q, m].find(r => r.error);
+    if (failed) toast("Couldn't load your account: " + failed.error.message);
+    account.profile = p.data;
+    account.mine = m.data || [];
+    progress.days = new Set((v.data || []).map(r => r.day));
+    progress.scores = Object.fromEntries((q.data || []).map(r => [r.fact_id, r]));
+    await mergeGuestProgress();
+    if (seq !== loadSeq) return;
+  } else {
+    Object.assign(progress, guestProgress());
+  }
+  recordVisit();
+  renderAccount(); renderProgress(); renderHero(); renderGrid();
+  loadCommunity();
+}
+
+// Progress made while signed out moves into the account on the next sign-in.
+async function mergeGuestProgress() {
+  const g = guestProgress();
+  const days = [...g.days].filter(d => !progress.days.has(d));
+  const ids = Object.keys(g.scores);
+  if (!days.length && !ids.length) return;
+  const uid = account.user.id;
+  const results = await Promise.all([
+    days.length ? sb.from('visits').upsert(days.map(day => ({ user_id: uid, day })), { ignoreDuplicates: true }) : {},
+    ...ids.map(id => sb.rpc('record_quiz', { p_fact_id: id, p_score: g.scores[id].best, p_attempts: g.scores[id].attempts }))
+  ]);
+  const failed = results.find(r => r.error);
+  if (failed) { toast("Couldn't move this browser's progress to your account: " + failed.error.message); return; }
+  days.forEach(d => progress.days.add(d));
+  results.slice(1).forEach(r => { progress.scores[r.data.fact_id] = r.data; });
+  clearGuestProgress();
+  toast("Progress from this browser was added to your account.");
+}
+
+function dayLabel(d) {
+  return new Date(2026, 0, 1 + d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+function authHTML() {
+  const up = state.authMode === 'signup';
+  return `${state.authNote ? `<p class="hint">${esc(state.authNote)}</p>` : ''}
+    <div class="filters" role="group" aria-label="Sign in or create an account">
+      <button class="chip" type="button" id="auth-in" data-auth="signin" aria-pressed="${!up}">Sign in</button>
+      <button class="chip" type="button" id="auth-up" data-auth="signup" aria-pressed="${up}">Create account</button>
+    </div>
+    <form class="form" id="auth-form" data-mode="${state.authMode}">
+      ${up ? `<label>Username
+        <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" aria-describedby="u-hint">
+      </label>
+      <p class="hint" id="u-hint">3 to 20 letters, numbers or underscores. It's shown on anything you submit.</p>` : ''}
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="${up ? 8 : 1}"></label>
+      <p class="msg" role="status"></p>
+      <button class="btn" type="submit">${up ? 'Create account' : 'Sign in'}</button>
+    </form>
+    <p class="hint">${up
+      ? "Your streak and quiz scores from this browser carry over to the new account."
+      : "Signing in syncs your streak and quiz scores across devices."}</p>`;
+}
+function profileHTML() {
+  const u = account.user, p = account.profile;
+  const st = streakStats(progress.days);
+  const taken = ORDER.map(id => BY_ID[id]).filter(f => progress.scores[f.id]);
+  const right = taken.reduce((n, f) => n + progress.scores[f.id].best, 0);
+  const asked = taken.reduce((n, f) => n + f.quiz.length, 0);
+  const tries = taken.reduce((n, f) => n + progress.scores[f.id].attempts, 0);
+  const tile = (label, value) => `<div class="tile"><span class="label">${label}</span><b>${value}</b></div>`;
+  const month = Array.from({ length: 28 }, (_, i) => TODAY - 27 + i);
+  const visited = month.filter(d => progress.days.has(d)).length;
+  const cal = month.map(d =>
+    `<i class="${progress.days.has(d) ? 'on' : ''}${d === TODAY ? ' today' : ''}" title="${dayLabel(d)}${progress.days.has(d) ? ' · visited' : ''}"></i>`).join('');
+  const scores = taken.length
+    ? '<ul class="rows">' + taken.map(f => {
+        const s = progress.scores[f.id];
+        return `<li><button class="linkish" data-open="${f.id}">${esc(f.title)}</button>
+          <span class="num">best ${s.best}/${f.quiz.length} · last ${s.last}/${f.quiz.length} · ${s.attempts} ${s.attempts === 1 ? 'try' : 'tries'}</span></li>`;
+      }).join('') + '</ul>'
+    : '<p class="empty">No quizzes yet. Every fact ends with three questions.</p>';
+  const mine = account.mine.length
+    ? '<ul class="rows">' + account.mine.map(s => `<li><span>${esc(s.title)} <span class="label">· ${s.kind === 'fact' ? 'Fact' : 'Topic'}</span></span>
+        <span class="num"><span class="badge ${esc(s.status)}">${esc(s.status)}</span>${s.status === 'pending' ? `<button class="chip" data-withdraw="${esc(s.id)}">Withdraw</button>` : ''}</span></li>`).join('') + '</ul>'
+    : '<p class="empty">Nothing submitted yet.</p>';
+  const since = p ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : '';
+  return `<div class="who"><b>@${esc(p ? p.username : u.email.split('@')[0])}</b>
+      <span class="hint">${esc(u.email)}${since ? ' · member since ' + since : ''}${p && p.is_admin ? ' · admin' : ''}</span></div>
+    <div class="tiles">
+      ${tile('Current streak', plural(st.current, 'day'))}
+      ${tile('Longest streak', plural(st.longest, 'day'))}
+      ${tile('Days visited', st.total)}
+      ${tile('Quizzes passed', passedCount() + ' / ' + FACTS.length)}
+      ${tile('Accuracy', asked ? Math.round(100 * right / asked) + '%' : '–')}
+      ${tile('Quiz attempts', tries)}
+    </div>
+    <h3>Last four weeks</h3>
+    <div class="days" role="img" aria-label="Visited on ${visited} of the last 28 days">${cal}</div>
+    <h3>Quiz scores</h3>${scores}
+    <h3>Your submissions</h3>${mine}
+    <div class="actions"><button class="btn ghost" id="sign-out">Sign out</button></div>`;
+}
+function renderAccount() {
+  if (!sb) return;
+  const p = account.profile;
+  $('#acct-btn').textContent = account.user ? '@' + (p ? p.username : account.user.email.split('@')[0]) : 'Sign in';
+  $('#acct-title').textContent = account.user ? 'Your account' : state.authMode === 'signup' ? 'Create an account' : 'Sign in';
+  $('#acct-body').innerHTML = account.user ? profileHTML() : authHTML();
+  $('#f-store').textContent = account.user
+    ? 'Your streak and quiz scores are saved to your account.'
+    : 'Your streak and quiz scores are kept in this browser until you sign in.';
+}
+function openAccount(note = '') {
+  state.authNote = note;
+  renderAccount();
+  if (!$('#acct-dlg').open) $('#acct-dlg').showModal();
+}
+
+async function submitAuth(form) {
+  const d = Object.fromEntries(new FormData(form));
+  const msg = form.querySelector('.msg'), btn = form.querySelector('[type="submit"]');
+  const say = (text, ok) => { msg.textContent = text; msg.className = 'msg ' + (ok ? 'ok' : 'err'); };
+  btn.disabled = true;
+  try {
+    if (form.dataset.mode === 'signup') {
+      const free = await sb.rpc('username_available', { name: d.username });
+      if (free.error) throw free.error;
+      if (!free.data) return say('That username is taken. Try another.');
+      const { data, error } = await sb.auth.signUp({
+        email: d.email, password: d.password,
+        options: { data: { username: d.username }, emailRedirectTo: location.origin + location.pathname }
+      });
+      if (error) throw error;
+      if (!data.session) say('Almost there. Open the confirmation link we emailed you, then sign in.', true);
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email: d.email, password: d.password });
+      if (error) throw error;
+    }
+  } catch (err) {
+    say(err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ---------- community submissions ---------- */
+const community = { items: [], queue: [] };
+const SUB_COLS = 'id,kind,field,title,body,source_url,status,created_at,profiles(username)';
+
+async function loadCommunity() {
+  if (!sb) return;
+  const admin = account.profile && account.profile.is_admin;
+  const [pub, queue] = await Promise.all([
+    sb.from('submissions').select(SUB_COLS).eq('status', 'approved').order('created_at', { ascending: false }).limit(200),
+    admin ? sb.from('submissions').select(SUB_COLS).eq('status', 'pending').order('created_at') : { data: [] }
+  ]);
+  if (pub.error || queue.error) toast("Couldn't load community facts: " + (pub.error || queue.error).message);
+  community.items = pub.data || [];
+  community.queue = queue.data || [];
+  renderCommunity();
+}
+async function loadMine() {
+  const { data } = await sb.from('submissions').select('id,kind,title,status,created_at').eq('user_id', account.user.id).order('created_at', { ascending: false });
+  if (data) { account.mine = data; if (account.user) renderAccount(); }
+}
+function submissionHTML(s, review) {
+  const paras = s.body.split(/\n\s*\n/).map(p => `<p>${esc(p.trim())}</p>`).join('');
+  const src = /^https?:\/\//i.test(s.source_url || '')
+    ? `<p class="links"><a href="${esc(s.source_url)}" target="_blank" rel="noopener nofollow ugc">Source ↗</a></p>` : '';
+  const who = s.profiles ? '@' + s.profiles.username : 'a reader';
+  const when = new Date(s.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  const kind = review ? ` · ${s.kind === 'fact' ? 'fact' : 'topic idea'}` : '';
+  return `<details class="ccard"${review ? ' open' : ''}>
+    <summary><span class="tag ${esc(s.field)}">${esc(s.field)}</span><span class="ttl">${esc(s.title)}</span><span class="byline">${esc(who)} · ${when}${kind}</span></summary>
+    <div class="cbody prose">${paras}${src}${review ? `<div class="actions" style="margin-bottom:12px">
+      <button class="btn" data-review="${esc(s.id)}" data-status="approved">Approve</button>
+      <button class="btn ghost" data-review="${esc(s.id)}" data-status="rejected">Reject</button></div>` : ''}</div>
+  </details>`;
+}
+function renderCommunity() {
+  document.querySelectorAll('#c-filters .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.cf === state.cfilter)));
+  const items = community.items.filter(s => s.kind === state.cfilter);
+  $('#clist').innerHTML = items.length
+    ? items.map(s => submissionHTML(s)).join('')
+    : `<p class="empty">No ${state.cfilter === 'fact' ? 'community facts' : 'topic ideas'} yet. Be the first to submit one.</p>`;
+  $('#review').hidden = !community.queue.length;
+  $('#review-list').innerHTML = community.queue.map(s => submissionHTML(s, true)).join('');
+}
+async function submitFact(form) {
+  const d = Object.fromEntries(new FormData(form));
+  const msg = form.querySelector('.msg'), btn = form.querySelector('[type="submit"]');
+  const row = { user_id: account.user.id, kind: d.kind, field: d.field, title: d.title.trim(), body: d.body.trim(), source_url: d.source_url.trim() || null };
+  if (row.title.length < 3 || row.body.length < 10) { msg.className = 'msg err'; msg.textContent = 'Please add a title and a few sentences.'; return; }
+  btn.disabled = true;
+  const { error } = await sb.from('submissions').insert(row);
+  btn.disabled = false;
+  if (error) {
+    msg.className = 'msg err';
+    msg.textContent = error.code === '42501' ? 'You already have 5 submissions waiting for review. Try again once they have been looked at.' : error.message;
+    return;
+  }
+  form.reset(); msg.textContent = '';
+  $('#submit-dlg').close();
+  toast('Thanks! Your submission is waiting for review.');
+  loadMine(); loadCommunity();
+}
+async function review(id, status) {
+  const { error } = await sb.from('submissions').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast("Couldn't update the submission: " + error.message); return; }
+  toast(status === 'approved' ? 'Published to Community facts.' : 'Submission rejected.');
+  loadCommunity();
+}
+async function withdraw(id) {
+  const { error } = await sb.from('submissions').delete().eq('id', id);
+  if (error) { toast("Couldn't withdraw it: " + error.message); return; }
+  loadMine(); loadCommunity();
+}
+
 /* ---------- navigation ---------- */
 function open(id, opts = {}) {
   if (!BY_ID[id]) return;
@@ -1201,10 +1609,16 @@ function open(id, opts = {}) {
 }
 
 document.addEventListener('click', e => {
+  if (e.target.tagName === 'DIALOG') { e.target.close(); return; } // backdrop click
   const t = e.target.closest('button, a');
   if (!t) return;
   if (t.id === 'home') { e.preventDefault(); open(TODAY_ID, { scroll: 'hero' }); return; }
-  if (t.dataset.open) { open(t.dataset.open, { scroll: 'hero' }); return; }
+  if ('close' in t.dataset) { t.closest('dialog').close(); return; }
+  if (t.dataset.open) { const d = t.closest('dialog'); if (d) d.close(); open(t.dataset.open, { scroll: 'hero' }); return; }
+  if (t.dataset.auth) { state.authMode = t.dataset.auth; renderAccount(); return; }
+  if (t.dataset.cf) { state.cfilter = t.dataset.cf; renderCommunity(); return; }
+  if (t.dataset.review) { review(t.dataset.review, t.dataset.status); return; }
+  if (t.dataset.withdraw) { withdraw(t.dataset.withdraw); return; }
   if (t.dataset.tab) { state.tab = t.dataset.tab; renderPanel(); return; }
   if (t.dataset.q !== undefined) { answer(+t.dataset.q, +t.dataset.o); return; }
   if (t.dataset.f) { state.filter = t.dataset.f; store.set('filter', state.filter); renderGrid(); return; }
@@ -1220,7 +1634,23 @@ document.addEventListener('click', e => {
     }
     case 'quiz-retake': state.answers[state.id] = []; renderQuiz(); break;
     case 'lz-restart': initLorenz(); break;
+    case 'acct-btn': state.authMode = 'signin'; openAccount(); break;
+    case 'sign-out': $('#acct-dlg').close(); sb.auth.signOut(); break;
+    case 'go-submit':
+      if (account.user) $('#submit-dlg').showModal();
+      else { state.authMode = 'signup'; openAccount('Create an account (or sign in) to submit facts and topic ideas.'); }
+      break;
   }
+});
+document.addEventListener('submit', e => {
+  if (e.target.id === 'auth-form') { e.preventDefault(); submitAuth(e.target); }
+  if (e.target.id === 'submit-form') { e.preventDefault(); submitFact(e.target); }
+});
+$('#submit-form').addEventListener('change', e => {
+  if (e.target.name !== 'kind') return;
+  const topic = e.target.value === 'topic';
+  $('#s-body-label').textContent = topic ? 'What should the deep dive cover, and why is it interesting?' : 'The fact, in your own words';
+  e.currentTarget.elements.title.placeholder = topic ? 'The Banach–Tarski paradox' : "Bees can't see red";
 });
 
 /* ---------- canvas helpers ---------- */
@@ -1303,7 +1733,20 @@ function initLorenz() {
 }
 
 /* ---------- boot ---------- */
-recordVisit();
+Object.assign(progress, guestProgress());
+if (sb) {
+  $('#acct-btn').hidden = false;
+  $('#community').hidden = false;
+  renderAccount();
+  // Supabase fires INITIAL_SESSION on load; the visit is recorded once we know who's here.
+  sb.auth.onAuthStateChange((event, session) => {
+    const user = session ? session.user : null;
+    if (event !== 'INITIAL_SESSION' && (user && user.id) === (account.user && account.user.id)) return;
+    setTimeout(() => loadAccount(user), 0); // don't call Supabase inside its own auth callback
+  });
+} else {
+  recordVisit();
+}
 renderProgress();
 tickCountdown();
 setInterval(tickCountdown, 30000);
