@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A daily physics or math fact with a deep dive, the math behind it, its history, linked papers and a quiz.">
+<title>The Strange Quark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  svg: { fontCache: 'global' },
+  startup: {
+    typeset: false,
+    ready() {
+      MathJax.startup.defaultReady();
+      MathJax.startup.promise.then(() => window.__typesetAll && window.__typesetAll());
+    }
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+<style>
+/* Layout: a lab notebook on graph paper (blueprint at night). Hero fact + specimen card, tabbed deep dive, collection grid. */
+:root {
+  --paper: #f1f4f7;
+  --grid: rgba(31, 95, 209, 0.075);
+  --card: #ffffff;
+  --ink: #13223a;
+  --ink-2: #4b5b72;
+  --rule: #cbd5e1;
+  --phys: #1f5fd1;
+  --math: #a9480c;
+  --good: #1b7a3c;
+  --bad: #c2352a;
+  --tint-phys: rgba(31, 95, 209, 0.09);
+  --tint-math: rgba(169, 72, 12, 0.09);
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0b2140; --grid: rgba(140, 194, 255, 0.085); --card: #10294b;
+    --ink: #e4eeff; --ink-2: #9fb4d2; --rule: #26466f;
+    --phys: #8cc2ff; --math: #ffb07a; --good: #72d69c; --bad: #ff8a7e;
+    --tint-phys: rgba(140, 194, 255, 0.12); --tint-math: rgba(255, 176, 122, 0.12);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0b2140; --grid: rgba(140, 194, 255, 0.085); --card: #10294b;
+  --ink: #e4eeff; --ink-2: #9fb4d2; --rule: #26466f;
+  --phys: #8cc2ff; --math: #ffb07a; --good: #72d69c; --bad: #ff8a7e;
+  --tint-phys: rgba(140, 194, 255, 0.12); --tint-math: rgba(255, 176, 122, 0.12);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--phys); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+.mono { font-family: var(--f-mono); }
+.label {
+  font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 20px 8px; }
+.brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; }
+.brand .eps { font-family: var(--f-body); font-style: italic; font-size: 2.2rem; line-height: 1; color: var(--phys); }
+.brand .name { font-family: var(--f-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
+.top-meta { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; line-height: 1.2; }
+.stat b { font-family: var(--f-mono); font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 36px; padding-block: 28px 40px; align-items: start; }
+.hero-main { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.tag {
+  font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 3px; border: 1px solid currentColor;
+}
+.tag.Physics { color: var(--phys); background: var(--tint-phys); }
+.tag.Mathematics { color: var(--math); background: var(--tint-math); }
+.fact-title { font-size: 1.05rem; font-weight: 700; color: var(--ink-2); font-family: var(--f-display); }
+.fact {
+  font-family: var(--f-display); font-weight: 700;
+  font-size: clamp(1.55rem, 3.3vw, 2.55rem); line-height: 1.14; letter-spacing: -0.02em;
+  max-width: 24ch; text-wrap: balance;
+}
+.hero.Physics .fact::first-letter { color: var(--phys); }
+.hero.Mathematics .fact::first-letter { color: var(--math); }
+.teaser { font-size: 1.1rem; color: var(--ink-2); max-width: 58ch; margin: 0; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  border: 1.5px solid var(--ink); background: var(--ink); color: var(--paper);
+  padding: 10px 18px; border-radius: 999px; font-family: var(--f-display); font-weight: 700; font-size: 0.98rem;
+  transition: transform 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); }
+
+.specimen {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  box-shadow: 0 1px 0 var(--rule), 0 14px 30px -22px rgba(10, 30, 60, 0.45);
+}
+.specimen .row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--rule); padding-bottom: 8px; }
+.specimen .row:last-child { border-bottom: 0; padding-bottom: 0; }
+.specimen .row span:last-child { font-family: var(--f-mono); font-size: 0.85rem; text-align: right; font-variant-numeric: tabular-nums; }
+.key-eq { min-height: 64px; overflow-x: auto; color: var(--ink); font-size: 1.05rem; }
+.key-cap { font-size: 0.9rem; color: var(--ink-2); margin: 0; }
+
+/* filters */
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--rule); background: var(--card); padding: 5px 12px; border-radius: 999px;
+  font-family: var(--f-mono); font-size: 0.78rem;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* deep dive */
+.deep { padding-block: 8px 48px; scroll-margin-top: 12px; }
+.deep-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+.deep-head h2 { font-size: 1.6rem; }
+.tabs { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 14px; }
+.tab {
+  background: transparent; border: 0; border-bottom: 3px solid transparent;
+  padding: 8px 14px; font-family: var(--f-display); font-weight: 700; font-size: 1rem; color: var(--ink-2);
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent, var(--phys)); }
+.panel {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: clamp(18px, 3vw, 34px); margin-top: 10px; min-width: 0;
+}
+.prose { max-width: 68ch; }
+.prose p { margin: 0 0 1em; }
+.prose h3 { font-size: 1.2rem; margin: 1.4em 0 0.5em; }
+.prose h3:first-child { margin-top: 0; }
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding-block: 4px; }
+.callout { border-left: 3px solid var(--accent, var(--phys)); padding: 4px 0 4px 16px; color: var(--ink-2); font-style: italic; margin: 0 0 1em; }
+.related { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.related button { border: 1px solid var(--rule); background: transparent; padding: 6px 12px; border-radius: 4px; font-family: var(--f-display); font-weight: 500; text-align: left; }
+.related button:hover { border-color: var(--ink); }
+
+/* figures */
+.figure { margin: 1.4em 0; border: 1px solid var(--rule); border-radius: 6px; padding: 14px; background: var(--paper); }
+.figure canvas { display: block; width: 100%; max-width: 440px; aspect-ratio: 1 / 1; margin: 0 auto; }
+.figure .lorenz { aspect-ratio: 4 / 3; max-width: 560px; }
+.fig-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; margin-top: 10px; font-family: var(--f-mono); font-size: 0.82rem; }
+.fig-controls input[type="range"] { width: min(260px, 100%); accent-color: var(--math); }
+.fig-cap { font-size: 0.88rem; color: var(--ink-2); text-align: center; margin: 8px 0 0; }
+.bars { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; align-items: end; height: 190px; max-width: 460px; margin: 0 auto; }
+.bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; font-family: var(--f-mono); font-size: 0.7rem; }
+.bar i { display: block; width: 100%; background: var(--math); border-radius: 2px 2px 0 0; }
+.bar b { font-weight: 600; font-size: 0.82rem; }
+
+/* history */
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; max-width: 72ch; }
+.timeline li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 18px; padding-block: 14px; border-bottom: 1px dashed var(--rule); }
+.timeline li:last-child { border-bottom: 0; }
+.timeline .yr { font-family: var(--f-mono); font-weight: 600; color: var(--accent, var(--phys)); font-variant-numeric: tabular-nums; }
+.timeline strong { font-family: var(--f-display); display: block; margin-bottom: 2px; }
+
+/* papers */
+.papers { display: flex; flex-direction: column; gap: 14px; max-width: 76ch; }
+.paper { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.paper .t { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; line-height: 1.3; }
+.paper .meta { font-size: 0.92rem; color: var(--ink-2); }
+.paper .why { font-size: 0.95rem; margin: 4px 0 0; }
+.paper .links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; font-family: var(--f-mono); font-size: 0.8rem; }
+.paper .links a { color: var(--accent, var(--phys)); }
+
+/* quiz */
+.quiz { display: flex; flex-direction: column; gap: 22px; max-width: 70ch; }
+.q h3 { font-size: 1.08rem; margin-bottom: 10px; font-weight: 700; }
+.q h3 .n { font-family: var(--f-mono); color: var(--ink-2); font-weight: 400; margin-right: 6px; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  text-align: left; background: transparent; border: 1.5px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px; font-family: var(--f-body); font-size: 1rem; display: flex; gap: 10px; align-items: baseline;
+}
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt .k { font-family: var(--f-mono); font-size: 0.8rem; color: var(--ink-2); }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--good); color: var(--good); }
+.opt.wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.explain { margin: 10px 0 0; padding: 10px 14px; border-radius: 6px; background: var(--paper); font-size: 0.97rem; }
+.explain b { font-family: var(--f-display); }
+.explain.ok b { color: var(--good); }
+.explain.no b { color: var(--bad); }
+.score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-top: 2px solid var(--ink); padding-top: 14px; }
+.score .big { font-family: var(--f-display); font-weight: 800; font-size: 2rem; font-variant-numeric: tabular-nums; }
+
+/* collection */
+.collection { padding-block: 10px 56px; }
+.coll-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 16px; }
+.coll-head h2 { font-size: 1.6rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.card {
+  text-align: left; background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.card:hover { border-color: var(--ink); transform: translateY(-2px); }
+.card.current { outline: 2px solid var(--ink); outline-offset: -1px; }
+.card .ttl { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+.card .foot { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-top: auto; }
+.card .status { font-family: var(--f-mono); font-size: 0.72rem; color: var(--ink-2); }
+.card .status.done { color: var(--good); }
+
+footer { border-top: 1px solid var(--rule); padding-block: 20px 36px; color: var(--ink-2); font-size: 0.9rem; }
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .timeline li { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" id="home" aria-label="The Strange Quark, back to today's fact"><span class="eps" aria-hidden="true">s</span><span class="name">The Strange Quark</span></a>
+    <div class="top-meta">
+      <div class="stat"><span class="label">Streak</span><b id="streak">1 day</b></div>
+      <div class="stat"><span class="label">Quizzes passed</span><b id="passed">0 / 14</b></div>
+      <div class="stat"><span class="label">Next fact in</span><b id="countdown">--</b></div>
+    </div>
+  </header>
+
+  <section class="hero" id="hero">
+    <div class="hero-main">
+      <div class="eyebrow">
+        <span class="tag" id="h-field">Physics</span>
+        <span class="label" id="h-when">Today's fact</span>
+      </div>
+      <h2 class="fact-title" id="h-title"></h2>
+      <h1 class="fact" id="h-fact"></h1>
+      <p class="teaser" id="h-teaser"></p>
+      <div class="actions">
+        <button class="btn" id="go-deep">Read the deep dive</button>
+        <button class="btn ghost" id="go-quiz">Take the quiz</button>
+        <button class="btn ghost" id="go-random">Random fact</button>
+        <button class="btn ghost" id="go-today" hidden>Back to today</button>
+      </div>
+    </div>
+    <aside class="specimen" aria-label="Fact summary">
+      <div class="label">The key equation</div>
+      <div class="key-eq" id="h-eq"></div>
+      <p class="key-cap" id="h-eqcap"></p>
+      <div class="row"><span class="label">Fact</span><span id="h-num"></span></div>
+      <div class="row"><span class="label">First described</span><span id="h-year"></span></div>
+      <div class="row"><span class="label">Papers linked</span><span id="h-papers"></span></div>
+      <div class="row"><span class="label">Your best quiz</span><span id="h-best"></span></div>
+    </aside>
+  </section>
+
+  <section class="deep" id="deep">
+    <div class="deep-head">
+      <div>
+        <div class="label">Deep dive</div>
+        <h2 id="d-title"></h2>
+      </div>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" id="tab-explore" data-tab="explore" aria-selected="true">Explore</button>
+      <button class="tab" role="tab" id="tab-math" data-tab="math" aria-selected="false">The math</button>
+      <button class="tab" role="tab" id="tab-history" data-tab="history" aria-selected="false">History</button>
+      <button class="tab" role="tab" id="tab-papers" data-tab="papers" aria-selected="false">Papers</button>
+      <button class="tab" role="tab" id="tab-quiz" data-tab="quiz" aria-selected="false">Quiz</button>
+    </div>
+    <div class="panel" role="tabpanel" id="panel"></div>
+  </section>
+
+  <section class="collection">
+    <div class="coll-head">
+      <div>
+        <div class="label">The collection</div>
+        <h2>Every fact so far</h2>
+      </div>
+      <div class="filters" id="filters">
+        <button class="chip" id="f-all" data-f="All" aria-pressed="true">All</button>
+        <button class="chip" id="f-phys" data-f="Physics" aria-pressed="false">Physics</button>
+        <button class="chip" id="f-math" data-f="Mathematics" aria-pressed="false">Mathematics</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer>
+    A new fact unlocks at local midnight and the collection rotates through physics and mathematics. Your streak and quiz scores are kept in this browser only. Paper links point to the publisher's DOI page where one exists; every paper also has a Google Scholar search link to find a free copy.
+  </footer>
+</div>
+
+<script>
+const R = String.raw;
+
+const FACTS = [
+{
+  id: 'muon', field: 'Physics', year: '1941',
+  title: 'The muons that outlive their own clocks',
+  fact: R`Muons born 15 km up in the sky should decay long before reaching the ground. About one passes through every square centimeter of Earth's surface each minute anyway.`,
+  teaser: R`They make it because their clocks run slow. Cosmic-ray muons are everyday proof of Einstein's time dilation.`,
+  eq: R`\[ \Delta t = \gamma\,\Delta\tau,\quad \gamma = \frac{1}{\sqrt{1 - v^2/c^2}} \]`,
+  eqcap: R`A moving clock's ticks \(\Delta\tau\) are stretched by the Lorentz factor \(\gamma\) as seen from the ground.`,
+  explore: R`
+    <p>When cosmic-ray protons slam into the upper atmosphere, they create showers of particles. Among them are <em>muons</em>, heavier cousins of the electron. A muon at rest lives on average just 2.2 microseconds before decaying into an electron and two neutrinos.</p>
+    <p>Even at nearly the speed of light, 2.2 microseconds is only enough time to cover about 660 meters. Muons are created 10 to 15 kilometers up. By everyday reasoning almost none should reach the ground, yet detectors at sea level count roughly 10,000 per square meter every minute. Some are passing through you as you read this.</p>
+    <p>Special relativity resolves the puzzle. From the ground, a muon moving at 0.998c has its internal clock slowed by a factor of about 16, so it lives long enough to travel roughly 10 km. From the muon's point of view nothing odd happens to its clock. Instead, the atmosphere rushing toward it is contracted to about 1/16 of its depth. Both descriptions agree on the one thing that can be checked: the muon arrives.</p>
+    <p class="callout">Time dilation also has a practical use: GPS satellites must correct for it (plus the opposite effect from weaker gravity in orbit) or positions would drift by about 10 km per day.</p>`,
+  math: R`
+    <h3>Without relativity</h3>
+    <p>The number of muons surviving after time \(t\) follows exponential decay with mean lifetime \(\tau = 2.197\ \mu\text{s}\):</p>
+    \[ N(t) = N_0\, e^{-t/\tau} \]
+    <p>At \(v = 0.998c\), the typical distance covered in one lifetime is \(v\tau \approx 0.998 \times (3\times10^8\ \text{m/s}) \times (2.2\times 10^{-6}\ \text{s}) \approx 660\ \text{m}\). Falling 15 km would take about 23 lifetimes, leaving a fraction of roughly \(e^{-23} \approx 10^{-10}\).</p>
+    <h3>With relativity</h3>
+    <p>In the Earth frame, the muon's lifetime is stretched by the Lorentz factor:</p>
+    \[ \gamma = \frac{1}{\sqrt{1 - (0.998)^2}} = \frac{1}{\sqrt{0.003996}} \approx 15.8 \]
+    \[ \gamma\tau \approx 34.7\ \mu\text{s} \quad\Rightarrow\quad \gamma v \tau \approx 10.4\ \text{km} \]
+    <p>Survival over 15 km becomes \(e^{-15/10.4} \approx 24\%\), many orders of magnitude more than the classical prediction.</p>
+    <h3>The muon's view: length contraction</h3>
+    \[ L = \frac{L_0}{\gamma} \approx \frac{15\ \text{km}}{15.8} \approx 0.95\ \text{km} \]
+    <p>In its own frame the muon lives only 2.2 μs, but the atmosphere it must cross is less than a kilometer thick. The decay fraction comes out exactly the same, as it must.</p>
+    <h3>The Frisch–Smith numbers</h3>
+    <p>In 1963 David Frisch and James Smith counted muons on Mount Washington (1,910 m) and at sea level in Cambridge, Massachusetts. They saw about 563 per hour at the summit. Without time dilation they expected around 27 per hour at sea level. They measured about 408, matching a dilation factor of roughly 8.8 for the muons they selected.</p>`,
+  history: [
+    ['1905', 'Einstein publishes special relativity', 'His paper on the electrodynamics of moving bodies predicts that moving clocks run slow.'],
+    ['1936', 'The muon is discovered', 'Carl Anderson and Seth Neddermeyer find a particle heavier than the electron in cosmic rays. I. I. Rabi famously asked, "Who ordered that?"'],
+    ['1941', 'Rossi and Hall measure it', 'Bruno Rossi and David Hall compare muon counts at different altitudes in Colorado and find decay rates that require time dilation.'],
+    ['1963', 'The classroom film', 'Frisch and Smith turn the experiment into the film "Time Dilation: An Experiment with Mu-Mesons," still shown in physics courses.'],
+    ['1977', 'Muons in a storage ring', 'At CERN, muons circling at γ ≈ 29.3 live about 29 times longer than at rest, confirming dilation to about 0.1%.']
+  ],
+  papers: [
+    { a: 'A. Einstein', y: 1905, t: 'Zur Elektrodynamik bewegter Körper (On the Electrodynamics of Moving Bodies)', j: 'Annalen der Physik 322(10), 891–921', url: 'https://doi.org/10.1002/andp.19053221004', why: 'The founding paper of special relativity, including time dilation.' },
+    { a: 'B. Rossi, D. B. Hall', y: 1941, t: 'Variation of the Rate of Decay of Mesotrons with Momentum', j: 'Physical Review 59, 223', url: 'https://doi.org/10.1103/PhysRev.59.223', why: 'The first experimental confirmation of time dilation using cosmic-ray muons.' },
+    { a: 'D. H. Frisch, J. H. Smith', y: 1963, t: 'Measurement of the Relativistic Time Dilation Using μ-Mesons', j: 'American Journal of Physics 31, 342', url: 'https://doi.org/10.1119/1.1969508', why: 'The Mount Washington experiment, written up clearly enough for students.' }
+  ],
+  quiz: [
+    { q: 'What is the mean lifetime of a muon at rest?', o: ['2.2 nanoseconds', '2.2 microseconds', '2.2 milliseconds', '2.2 seconds'], a: 1, e: 'About 2.2 μs. Even at light speed that only covers about 660 m without relativity.' },
+    { q: 'In the muon\'s own rest frame, why does it reach the ground?', o: ['Its clock runs slow', 'The atmosphere is length-contracted', 'It speeds up as it falls', 'Gravity extends its lifetime'], a: 1, e: 'In its own frame the muon\'s clock is normal. The atmosphere moving past it is contracted by γ, so the trip is short.' },
+    { q: 'Roughly what is γ for a muon moving at 0.998c?', o: ['About 1.6', 'About 4', 'About 16', 'About 500'], a: 2, e: 'γ = 1/√(1 − 0.998²) ≈ 15.8.' }
+  ],
+  related: ['gw', 'tunnel']
+},
+{
+  id: 'cantor', field: 'Mathematics', year: '1874',
+  title: 'Some infinities are bigger than others',
+  fact: R`There are more real numbers between 0 and 1 than there are whole numbers in total, and this has been proven.`,
+  teaser: R`Georg Cantor showed that infinity comes in sizes, and that no list could ever contain every real number.`,
+  eq: R`\[ |\mathbb{N}| = \aleph_0 \;<\; 2^{\aleph_0} = |\mathbb{R}| \]`,
+  eqcap: R`The set of natural numbers is "countably" infinite. The real numbers form a strictly larger infinity.`,
+  explore: R`
+    <p>How do you compare the sizes of two infinite sets? Cantor's answer: pair them up. If every element of one set can be matched with exactly one element of the other, with nothing left over, they are the same size.</p>
+    <p>This leads to surprises. The even numbers seem to be "half" of the natural numbers, but the pairing \(n \leftrightarrow 2n\) matches them perfectly. The fractions seem far more numerous, since there are infinitely many between any two whole numbers, yet they too can be listed one by one. Galileo noticed the same oddity with perfect squares in 1638 and concluded that "greater" and "less" make no sense for infinite sets.</p>
+    <p>Cantor went further and showed that the real numbers <em>cannot</em> be listed. Any attempted list misses some number. So there are at least two different sizes of infinity, and in fact an endless tower of them, since every set has strictly more subsets than elements.</p>
+    <p class="callout">Is there an infinity strictly between the naturals and the reals? This is the Continuum Hypothesis. The answer turned out to be that the standard axioms of mathematics cannot decide it.</p>`,
+  math: R`
+    <h3>Same size: a bijection</h3>
+    <p>Two sets \(A\) and \(B\) have the same cardinality if there is a bijection \(f: A \to B\). For the naturals and the even numbers:</p>
+    \[ f(n) = 2n: \quad 1\mapsto 2,\; 2\mapsto 4,\; 3\mapsto 6,\; \dots \]
+    <h3>The diagonal argument (1891)</h3>
+    <p>Suppose someone claims to list every real number in \((0,1)\) as decimals:</p>
+    \[ \begin{aligned} r_1 &= 0.\underline{d_{11}}\,d_{12}\,d_{13}\dots \\ r_2 &= 0.d_{21}\,\underline{d_{22}}\,d_{23}\dots \\ r_3 &= 0.d_{31}\,d_{32}\,\underline{d_{33}}\dots \end{aligned} \]
+    <p>Build a new number \(x = 0.x_1x_2x_3\dots\) by changing each diagonal digit, for example:</p>
+    \[ x_n = \begin{cases} 5 & \text{if } d_{nn} \ne 5 \\ 4 & \text{if } d_{nn} = 5 \end{cases} \]
+    <p>Then \(x\) differs from \(r_n\) in the \(n\)-th digit for every \(n\), so \(x\) is not on the list. (Using only the digits 4 and 5 avoids the \(0.4999\ldots = 0.5\) ambiguity.) No list is complete, so \(|\mathbb{R}| > |\mathbb{N}|\).</p>
+    <h3>Cantor's theorem</h3>
+    <p>For any set \(S\), its power set (the set of all its subsets) is strictly larger:</p>
+    \[ |\mathcal{P}(S)| > |S| \]
+    <p>Given any \(f: S \to \mathcal{P}(S)\), the set \(D = \{\,s \in S : s \notin f(s)\,\}\) cannot equal \(f(s)\) for any \(s\). This gives an infinite ladder \(\aleph_0 < 2^{\aleph_0} < 2^{2^{\aleph_0}} < \cdots\)</p>`,
+  history: [
+    ['1638', "Galileo's paradox", 'In Two New Sciences, Galileo notes that squares can be paired with all naturals, though most numbers are not squares.'],
+    ['1874', 'The reals are uncountable', 'Cantor publishes his first proof, hidden inside a paper on algebraic numbers to avoid controversy.'],
+    ['1891', 'The diagonal argument', 'Cantor gives the short, now-famous diagonal proof and the general power-set theorem.'],
+    ['1900', 'Hilbert\'s first problem', 'David Hilbert puts the Continuum Hypothesis first on his list of 23 problems for the new century.'],
+    ['1940', 'Gödel: it cannot be disproved', 'Kurt Gödel shows the Continuum Hypothesis is consistent with the standard axioms.'],
+    ['1963', 'Cohen: it cannot be proved', 'Paul Cohen invents "forcing" to show its negation is consistent too. He receives the Fields Medal in 1966.']
+  ],
+  papers: [
+    { a: 'G. Cantor', y: 1874, t: 'Ueber eine Eigenschaft des Inbegriffes aller reellen algebraischen Zahlen', j: 'Journal für die reine und angewandte Mathematik 77, 258–262', url: 'https://doi.org/10.1515/crll.1874.77.258', why: 'The first proof that the real numbers are uncountable.' },
+    { a: 'K. Gödel', y: 1938, t: 'The Consistency of the Axiom of Choice and of the Generalized Continuum-Hypothesis', j: 'PNAS 24(12), 556–557', url: 'https://doi.org/10.1073/pnas.24.12.556', why: 'Shows CH cannot be disproved from the standard axioms.' },
+    { a: 'P. J. Cohen', y: 1963, t: 'The Independence of the Continuum Hypothesis', j: 'PNAS 50(6), 1143–1148', url: 'https://doi.org/10.1073/pnas.50.6.1143', why: 'Shows CH cannot be proved either, introducing the method of forcing.' }
+  ],
+  quiz: [
+    { q: 'Which set has the same cardinality as the natural numbers?', o: ['The real numbers', 'The rational numbers (fractions)', 'All subsets of the naturals', 'The points on a line segment'], a: 1, e: 'The rationals can be listed, for example by sweeping diagonally through a grid of numerators and denominators.' },
+    { q: 'The diagonal argument builds a number that...', o: ['Is larger than every number on the list', 'Is the average of the list', 'Differs from the n-th listed number in its n-th digit', 'Repeats the diagonal digits'], a: 2, e: 'Changing the n-th digit of the n-th number guarantees the new number cannot equal any listed one.' },
+    { q: 'What is the status of the Continuum Hypothesis?', o: ['Proved true by Cantor', 'Proved false by Hilbert', 'Independent of the standard (ZFC) axioms', 'Still completely open'], a: 2, e: 'Gödel (1940) and Cohen (1963) together showed ZFC can neither prove nor disprove it.' }
+  ],
+  related: ['fourcolor', 'basel']
+},
+{
+  id: 'tunnel', field: 'Physics', year: '1928',
+  title: 'The Sun shines by quantum tunneling',
+  fact: R`By classical physics the Sun's core, at 15 million kelvin, is far too cold to fuse hydrogen. Protons get close enough only by tunneling through a barrier they can't climb.`,
+  teaser: R`The typical proton has about a thousand times too little energy. Quantum mechanics lets a tiny fraction slip through anyway.`,
+  eq: R`\[ P \approx \exp\!\left(-\sqrt{\frac{E_G}{E}}\right) \]`,
+  eqcap: R`The Gamow factor: the probability of tunneling through the Coulomb barrier at energy \(E\).`,
+  explore: R`
+    <p>Two protons repel each other electrically. To fuse, they must get within about a femtometer, close enough for the strong nuclear force to take over. The electric "hill" they must climb is about 1 MeV high.</p>
+    <p>The average thermal energy of a proton at the Sun's core is about 1.3 keV, roughly a thousand times too small. Even the fastest protons in the thermal distribution don't come close. By classical physics, the Sun should not shine.</p>
+    <p>Quantum mechanics changes the picture. A proton is described by a wave, and a wave hitting a barrier doesn't stop dead: it decays exponentially inside it. If the barrier is thin enough, a small part of the wave emerges on the other side. The particle has a small but real chance to appear where it could never classically go.</p>
+    <p>George Gamow worked this out in 1928 to explain radioactive alpha decay, where an alpha particle tunnels <em>out</em> of a nucleus. A year later Atkinson and Houtermans realized the same math could let particles tunnel <em>in</em>, and stellar fusion finally made sense.</p>
+    <p class="callout">Even with tunneling, a given proton in the Sun's core waits on average billions of years before fusing. That slowness is why the Sun lasts about 10 billion years instead of exploding.</p>`,
+  math: R`
+    <h3>The barrier</h3>
+    <p>The Coulomb energy between two protons separated by \(r\):</p>
+    \[ U(r) = \frac{e^2}{4\pi\varepsilon_0\, r} \approx \frac{1.44\ \text{MeV·fm}}{r} \;\Rightarrow\; U(1\ \text{fm}) \approx 1.4\ \text{MeV} \]
+    <p>Compare the thermal energy at \(T = 1.5\times10^7\ \text{K}\):</p>
+    \[ k_B T \approx (8.617\times10^{-5}\ \text{eV/K})(1.5\times 10^7\ \text{K}) \approx 1.3\ \text{keV} \]
+    <h3>Tunneling probability</h3>
+    <p>In the WKB approximation, a wave inside a classically forbidden region decays, and the transmission probability is</p>
+    \[ T \approx \exp\!\left( -\frac{2}{\hbar} \int_{r_1}^{r_2} \sqrt{2m\,[U(r) - E]}\;dr \right) \]
+    <p>For a Coulomb barrier this works out to the Gamow factor \(e^{-\sqrt{E_G/E}}\), with the Gamow energy</p>
+    \[ E_G = 2 m_r c^2 \,(\pi \alpha Z_1 Z_2)^2 \]
+    <p>For two protons, \(m_r = m_p/2\) and \(\alpha \approx 1/137\), so \(E_G \approx 938\ \text{MeV} \times (\pi/137)^2 \approx 493\ \text{keV}\).</p>
+    <h3>The Gamow peak</h3>
+    <p>Fusion needs a proton that is both fast (rare, by the Boltzmann factor \(e^{-E/k_BT}\)) and lucky (tunneling, \(e^{-\sqrt{E_G/E}}\)). The product peaks at</p>
+    \[ E_0 = \left( \frac{E_G\,(k_B T)^2}{4} \right)^{1/3} \approx 6\ \text{keV} \]
+    <p>So the protons that actually fuse are those with about 5 times the average thermal energy, still about 200 times below the barrier top.</p>`,
+  history: [
+    ['1920', 'Eddington\'s guess', 'Arthur Eddington proposes that stars are powered by turning hydrogen into helium, but cannot explain how protons overcome repulsion.'],
+    ['1928', 'Tunneling explains alpha decay', 'George Gamow, and independently Ronald Gurney and Edward Condon, show alpha particles escape nuclei by tunneling.'],
+    ['1929', 'Tunneling into nuclei', 'Robert Atkinson and Fritz Houtermans apply Gamow\'s factor to fusion inside stars.'],
+    ['1939', 'Bethe maps the reactions', 'Hans Bethe works out the proton–proton chain and the CNO cycle. He receives the 1967 Nobel Prize.'],
+    ['2014', 'Seeing the first step', 'The Borexino experiment detects neutrinos from the very first proton–proton fusion step in the Sun\'s core.']
+  ],
+  papers: [
+    { a: 'G. Gamow', y: 1928, t: 'Zur Quantentheorie des Atomkernes', j: 'Zeitschrift für Physik 51, 204–212', url: 'https://doi.org/10.1007/BF01343196', why: 'Introduces quantum tunneling through the nuclear Coulomb barrier.' },
+    { a: 'H. A. Bethe', y: 1939, t: 'Energy Production in Stars', j: 'Physical Review 55, 434', url: 'https://doi.org/10.1103/PhysRev.55.434', why: 'Works out which fusion reactions power stars, building on the Gamow factor.' },
+    { a: 'Borexino Collaboration', y: 2014, t: 'Neutrinos from the primary proton–proton fusion process in the Sun', j: 'Nature 512, 383–386', url: 'https://doi.org/10.1038/nature13702', why: 'Direct, real-time detection of the reaction that tunneling makes possible.' }
+  ],
+  quiz: [
+    { q: 'About how hot is the Sun\'s core?', o: ['6,000 K', '150,000 K', '15 million K', '15 billion K'], a: 2, e: 'About 15 million K. The surface is near 5,800 K.' },
+    { q: 'How does the tunneling probability depend on the protons\' energy E?', o: ['It falls as E increases', 'It is independent of E', 'It rises very steeply as E increases', 'It is exactly proportional to E'], a: 2, e: 'P ≈ exp(−√(E_G/E)): small increases in energy raise it dramatically.' },
+    { q: 'What direct evidence shows the first fusion step happening in the Sun right now?', o: ['Sunspots', 'Neutrinos detected on Earth', 'The solar wind', 'Solar eclipses'], a: 1, e: 'Neutrinos escape the core almost freely. Borexino detected pp-chain neutrinos in 2014.' }
+  ],
+  related: ['muon', 'hawking']
+},
+{
+  id: 'basel', field: 'Mathematics', year: '1735',
+  title: 'The circle hiding in a sum of squares',
+  fact: R`Add up 1 + 1/4 + 1/9 + 1/16 + ..., the reciprocals of every perfect square, and the total is exactly π²/6, even though no circle appears anywhere in the problem.`,
+  teaser: R`It took the best mathematicians of Europe nearly a century to find the answer. A 28-year-old Euler cracked it with an audacious trick.`,
+  eq: R`\[ \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6} \]`,
+  eqcap: R`The Basel problem. The value is \(\zeta(2)\), the Riemann zeta function at 2.`,
+  explore: R`
+    <p>In 1650 the Italian Pietro Mengoli asked a simple question: what does \(1 + \tfrac14 + \tfrac19 + \tfrac1{16} + \cdots\) add up to? The sum clearly converges, to about 1.645, but nobody could find a closed form. Jakob Bernoulli, of Basel, publicized the problem and admitted defeat.</p>
+    <p>In 1734 Leonhard Euler, also from Basel, found the answer: \(\pi^2/6\). His method was bold. He treated the sine function as if it were an infinitely long polynomial and factored it by its roots, a step he could not justify at the time (he proved it properly years later).</p>
+    <p>The appearance of π is a clue that the problem secretly involves periodic functions, and that sums over integers are tied to geometry. That connection grew into the Riemann zeta function, now at the heart of the deepest open problem in mathematics.</p>
+    <p class="callout">Pick two whole numbers at random. The probability that they share no common factor is 6/π², about 61%. It is the Basel sum, turned upside down.</p>`,
+  math: R`
+    <h3>Euler's argument</h3>
+    <p>The function \(\frac{\sin x}{x}\) has roots at \(x = \pm\pi, \pm 2\pi, \pm 3\pi, \dots\) Euler wrote it as a product over those roots, like a polynomial:</p>
+    \[ \frac{\sin x}{x} = \left(1 - \frac{x^2}{\pi^2}\right)\left(1 - \frac{x^2}{4\pi^2}\right)\left(1 - \frac{x^2}{9\pi^2}\right)\cdots \]
+    <p>Multiply out and collect the \(x^2\) terms:</p>
+    \[ \frac{\sin x}{x} = 1 - \left( \frac{1}{\pi^2} + \frac{1}{4\pi^2} + \frac{1}{9\pi^2} + \cdots \right) x^2 + \cdots \]
+    <p>But the Taylor series of sine gives</p>
+    \[ \frac{\sin x}{x} = 1 - \frac{x^2}{6} + \frac{x^4}{120} - \cdots \]
+    <p>Matching the \(x^2\) coefficients:</p>
+    \[ \frac{1}{\pi^2}\sum_{n=1}^\infty \frac{1}{n^2} = \frac{1}{6} \quad\Longrightarrow\quad \sum_{n=1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6} \approx 1.6449 \]
+    <p>The infinite product was later made rigorous by Weierstrass's factorization theorem.</p>
+    <h3>The zeta function and primes</h3>
+    <p>Define \(\zeta(s) = \sum_{n\ge1} n^{-s}\). Euler also discovered that it factors over the primes:</p>
+    \[ \zeta(s) = \prod_{p\ \text{prime}} \frac{1}{1 - p^{-s}} \]
+    <p>The chance that a random integer pair is not both divisible by \(p\) is \(1 - p^{-2}\). Multiplying over all primes gives the coprime probability \(1/\zeta(2) = 6/\pi^2 \approx 0.608\).</p>`,
+  history: [
+    ['1650', 'Mengoli asks', 'Pietro Mengoli poses the problem of summing the reciprocal squares.'],
+    ['1689', 'Bernoulli gives up', 'Jakob Bernoulli publishes the problem and asks for help. It becomes known after his home city, Basel.'],
+    ['1735', 'Euler solves it', 'Euler presents π²/6 to the St. Petersburg Academy, and soon finds ζ(4) = π⁴/90 and more.'],
+    ['1741', 'A rigorous proof', 'Euler finds a fully justified proof, removing doubts about his infinite-product step.'],
+    ['1859', 'Riemann\'s zeta', 'Bernhard Riemann extends ζ(s) to complex numbers and links its zeros to the distribution of primes.']
+  ],
+  papers: [
+    { a: 'L. Euler', y: 1740, t: 'De summis serierum reciprocarum (On the sums of series of reciprocals), E41', j: 'Commentarii academiae scientiarum Petropolitanae 7, 123–134', url: 'https://scholarlycommons.pacific.edu/euler-works/41/', why: 'Euler\'s original solution. The Euler Archive hosts a scan and English translation.' },
+    { a: 'B. Riemann', y: 1859, t: 'Ueber die Anzahl der Primzahlen unter einer gegebenen Grösse', j: 'Monatsberichte der Berliner Akademie', url: '', why: 'The paper that extends the zeta function and states the Riemann Hypothesis.' }
+  ],
+  quiz: [
+    { q: 'What is 1 + 1/4 + 1/9 + 1/16 + ... equal to?', o: ['π/4', 'e', 'π²/6', 'Infinity'], a: 2, e: 'π²/6 ≈ 1.6449. The series converges, but slowly.' },
+    { q: 'What is the probability that two random integers share no common factor?', o: ['About 50%', 'About 61%', 'About 6%', 'About 99%'], a: 1, e: '6/π² ≈ 0.608, the reciprocal of the Basel sum.' },
+    { q: 'Euler\'s proof compared two expansions of which function?', o: ['eˣ', 'ln x', 'sin(x)/x', 'tan x'], a: 2, e: 'He matched the product over roots of sin(x)/x with its Taylor series.' }
+  ],
+  related: ['casimir', 'bec']
+},
+{
+  id: 'gw', field: 'Physics', year: '1916',
+  title: 'Hearing spacetime ripple',
+  fact: R`In 2015, LIGO's 4-kilometer arms stretched and squeezed by about 4 × 10⁻¹⁸ m, a few thousandths of a proton's width, as two black holes merged 1.3 billion light-years away.`,
+  teaser: R`In a fraction of a second, the merger turned three Suns' worth of mass into gravitational waves.`,
+  eq: R`\[ h = \frac{\Delta L}{L} \sim 10^{-21} \]`,
+  eqcap: R`The strain \(h\): the fractional change in length as a gravitational wave passes.`,
+  explore: R`
+    <p>General relativity says mass curves spacetime, and accelerating masses send ripples through it at the speed of light. A passing wave stretches space in one direction while squeezing it in the perpendicular direction, then reverses.</p>
+    <p>LIGO detects this with two 4-km arms at right angles. Laser light bounces back and forth hundreds of times along each arm, and the returning beams are combined. If the arm lengths change differently, the light patterns shift.</p>
+    <p>On 14 September 2015, both LIGO detectors (in Washington and Louisiana, 3,000 km apart) recorded a 0.2-second "chirp": a signal rising in frequency from 35 to 250 Hz. It matched the final orbits of two black holes, of about 36 and 29 solar masses, spiraling together into one of about 62. The missing 3 solar masses left as gravitational waves. For a moment the merger outshone every star in the observable universe combined, in gravitational rather than electromagnetic radiation.</p>
+    <p class="callout">The chirp is in the audio range. Shifted into sound, it's a short "whoop" rising in pitch.</p>`,
+  math: R`
+    <h3>How small is the strain?</h3>
+    \[ \Delta L = h L \approx (10^{-21})(4\times10^3\ \text{m}) = 4\times10^{-18}\ \text{m} \]
+    <p>A proton is about \(1.7\times10^{-15}\) m across, so \(\Delta L\) is roughly 1/400 of a proton width.</p>
+    <h3>The chirp</h3>
+    <p>As the orbit shrinks, the wave frequency \(f\) climbs. To leading order it depends only on the <em>chirp mass</em>:</p>
+    \[ \mathcal{M} = \frac{(m_1 m_2)^{3/5}}{(m_1 + m_2)^{1/5}} \]
+    \[ \frac{df}{dt} = \frac{96}{5}\,\pi^{8/3} \left( \frac{G\mathcal{M}}{c^3} \right)^{5/3} f^{11/3} \]
+    <p>Measuring \(f\) and \(df/dt\) from the signal gives \(\mathcal{M}\) directly. For GW150914 this was about 30 solar masses.</p>
+    <h3>Energy radiated</h3>
+    \[ E = \Delta m\, c^2 \approx 3 M_\odot c^2 \approx 3 \times (2\times10^{30}\ \text{kg})(3\times10^8\ \text{m/s})^2 \approx 5\times10^{47}\ \text{J} \]
+    <p>The peak power was about \(3.6\times10^{49}\) W.</p>
+    <h3>The quadrupole formula</h3>
+    <p>Einstein showed the radiated power depends on the changing mass quadrupole moment \(Q_{ij}\):</p>
+    \[ P = \frac{G}{5c^5} \left\langle \dddot{Q}_{ij}\, \dddot{Q}_{ij} \right\rangle \]
+    <p>The factor \(G/c^5 \approx 3\times10^{-53}\ \text{W}^{-1}\) explains why only enormous masses moving near light speed produce detectable waves.</p>`,
+  history: [
+    ['1916', 'Einstein predicts them', 'Months after general relativity, Einstein shows the equations allow waves of spacetime.'],
+    ['1936', 'Einstein doubts', 'Einstein and Nathan Rosen briefly argue gravitational waves don\'t exist. An error is found and the paper is revised.'],
+    ['1957', 'The sticky bead argument', 'At the Chapel Hill conference, Richard Feynman and others argue the waves carry real energy.'],
+    ['1974', 'Indirect evidence', 'Russell Hulse and Joseph Taylor find a binary pulsar whose orbit shrinks exactly as gravitational radiation predicts. Nobel Prize, 1993.'],
+    ['2015', 'First direct detection', 'LIGO records GW150914. Rainer Weiss, Barry Barish and Kip Thorne receive the 2017 Nobel Prize.'],
+    ['2017', 'Colliding neutron stars', 'GW170817 is seen in gravitational waves and light, revealing a source of gold and other heavy elements.']
+  ],
+  papers: [
+    { a: 'B. P. Abbott et al. (LIGO & Virgo)', y: 2016, t: 'Observation of Gravitational Waves from a Binary Black Hole Merger', j: 'Physical Review Letters 116, 061102', url: 'https://doi.org/10.1103/PhysRevLett.116.061102', why: 'The discovery paper. Also free on arXiv as 1602.03837.' },
+    { a: 'R. A. Hulse, J. H. Taylor', y: 1975, t: 'Discovery of a pulsar in a binary system', j: 'Astrophysical Journal 195, L51', url: 'https://doi.org/10.1086/181708', why: 'The binary pulsar that later gave the first indirect evidence of gravitational waves.' },
+    { a: 'A. Einstein', y: 1916, t: 'Näherungsweise Integration der Feldgleichungen der Gravitation', j: 'Sitzungsberichte der Preussischen Akademie der Wissenschaften', url: '', why: 'The original prediction of gravitational waves.' }
+  ],
+  quiz: [
+    { q: 'What is the typical strain h of a detectable gravitational wave at Earth?', o: ['10⁻³', '10⁻⁹', '10⁻²¹', '10⁻⁴⁵'], a: 2, e: 'About 10⁻²¹: a 4-km arm changes by about 4 × 10⁻¹⁸ m.' },
+    { q: 'How much mass did GW150914 convert into gravitational waves?', o: ['About 3 solar masses', 'About 0.01 solar masses', 'About 62 solar masses', 'None; waves carry no energy'], a: 0, e: '36 + 29 = 65, but the final black hole was about 62 solar masses. About 3 were radiated.' },
+    { q: 'What gave the first (indirect) evidence that gravitational waves exist?', o: ['The cosmic microwave background', 'A binary pulsar\'s shrinking orbit', 'Mercury\'s orbit', 'Gravitational lensing'], a: 1, e: 'The Hulse–Taylor pulsar\'s orbit decays exactly as predicted by energy lost to gravitational waves.' }
+  ],
+  related: ['muon', 'hawking']
+},
+{
+  id: 'benford', field: 'Mathematics', year: '1881',
+  title: 'Why 1 is the most common first digit',
+  fact: R`In many real-world datasets, such as populations, river lengths and stock prices, about 30% of numbers start with the digit 1. Fewer than 5% start with 9.`,
+  teaser: R`It's called Benford's law, and auditors use it to catch fraud.`,
+  eq: R`\[ P(d) = \log_{10}\!\left(1 + \frac{1}{d}\right) \]`,
+  eqcap: R`The probability that the leading digit is \(d\), for \(d = 1, \dots, 9\).`,
+  figure: 'benford',
+  explore: R`
+    <p>You might expect each leading digit from 1 to 9 to be equally common, about 11% each. For many natural datasets that's badly wrong: 1 leads about 30.1% of the time, 2 about 17.6%, falling to 9 at only 4.6%.</p>
+    <p>The astronomer Simon Newcomb noticed this in 1881. In books of logarithm tables, the early pages (for numbers starting with 1) were far more worn than the later ones. The physicist Frank Benford rediscovered it in 1938 and checked over 20,000 numbers from sources as different as river areas, baseball statistics and street addresses.</p>
+    <p>The law works best for data that spans several orders of magnitude and has no built-in scale. To grow from 100 to 200 a quantity must double, but to grow from 900 to 1000 it needs only 11% more. Numbers spend more "time" with a leading 1.</p>
+    <p>Forensic accountants exploit this. Invented numbers tend to have too many 5s and 6s and too few 1s. Benford tests have flagged suspicious tax returns, accounting records and election data, though a deviation is a reason to look closer, not proof of fraud.</p>`,
+  math: R`
+    <h3>The law</h3>
+    \[ P(d) = \log_{10}(d+1) - \log_{10}(d) = \log_{10}\!\left(1 + \frac{1}{d}\right) \]
+    <p>So \(P(1) = \log_{10}2 \approx 0.301\) and \(P(9) = \log_{10}(10/9) \approx 0.046\). The nine probabilities add up to \(\log_{10}10 = 1\).</p>
+    <h3>Why: uniform on a log scale</h3>
+    <p>Write a positive number as \(x = 10^{k + u}\) with integer \(k\) and \(0 \le u < 1\). The leading digit is \(d\) exactly when</p>
+    \[ \log_{10} d \;\le\; u \;<\; \log_{10}(d+1) \]
+    <p>If \(u\) (the fractional part of \(\log_{10}x\)) is spread uniformly, the chance of landing in that interval is its length, which is Benford's formula.</p>
+    <h3>Scale invariance</h3>
+    <p>Changing units multiplies every value by a constant \(c\), which shifts \(\log_{10}x\) by \(\log_{10}c\). The only distribution of \(u\) that is unchanged by every shift is the uniform one. So any first-digit law that doesn't depend on units (meters or feet, dollars or rupees) must be Benford's law. Theodore Hill made this precise in 1995.</p>
+    <h3>Second digits too</h3>
+    <p>The law extends to later digits. The probability that the first two digits are "\(d_1d_2\)" is \(\log_{10}\!\left(1 + \frac{1}{10d_1 + d_2}\right)\), and the effect fades quickly for later positions.</p>`,
+  history: [
+    ['1881', 'Newcomb\'s worn pages', 'Simon Newcomb notices logarithm tables are dirtier at the front and states the law in a two-page note.'],
+    ['1938', 'Benford tests it', 'Frank Benford, a physicist at General Electric, analyzes 20,229 numbers from 20 datasets.'],
+    ['1961', 'Scale invariance', 'Roger Pinkham shows that a scale-invariant first-digit law must be Benford\'s.'],
+    ['1995', 'A proof', 'Theodore Hill proves that mixing samples from many different distributions tends toward Benford\'s law.'],
+    ['1990s', 'Fraud detection', 'Mark Nigrini popularizes Benford analysis in forensic accounting and auditing.']
+  ],
+  papers: [
+    { a: 'S. Newcomb', y: 1881, t: 'Note on the Frequency of Use of the Different Digits in Natural Numbers', j: 'American Journal of Mathematics 4(1), 39–40', url: 'https://doi.org/10.2307/2369148', why: 'The first statement of the law.' },
+    { a: 'F. Benford', y: 1938, t: 'The Law of Anomalous Numbers', j: 'Proceedings of the American Philosophical Society 78(4), 551–572', url: 'https://www.jstor.org/stable/984802', why: 'The large empirical study that gave the law its name.' },
+    { a: 'T. P. Hill', y: 1995, t: 'A Statistical Derivation of the Significant-Digit Law', j: 'Statistical Science 10(4), 354–363', url: 'https://doi.org/10.1214/ss/1177009869', why: 'Explains why the law appears in mixed real-world data.' }
+  ],
+  quiz: [
+    { q: 'About how often does a Benford dataset have 1 as its leading digit?', o: ['11%', '20%', '30%', '50%'], a: 2, e: 'log₁₀(2) ≈ 30.1%.' },
+    { q: 'Which property forces a first-digit law to be Benford\'s?', o: ['Normality', 'Scale (unit) invariance', 'Symmetry', 'Periodicity'], a: 1, e: 'If the law must look the same in any units, the log-fractional part must be uniform.' },
+    { q: 'Which dataset is LEAST likely to follow Benford\'s law?', o: ['Country populations', 'Adult human heights in cm', 'River lengths', 'Company revenues'], a: 1, e: 'Adult heights cluster in a narrow range (mostly 150–190 cm), so almost all start with 1. They don\'t span orders of magnitude.' }
+  ],
+  related: ['phyllo', 'lorenz']
+},
+{
+  id: 'bell', field: 'Physics', year: '1964',
+  title: 'Entanglement breaks a common-sense rule',
+  fact: R`No theory in which particles carry pre-set answers and influences travel no faster than light can match what entangled particles do. Experiments in 2015 closed the last major loopholes.`,
+  teaser: R`Einstein called it "spooky action at a distance." John Bell turned the argument into a number you can measure.`,
+  eq: R`\[ |S| \le 2 \quad\text{vs.}\quad S_{\text{QM}} = 2\sqrt{2} \]`,
+  eqcap: R`The CHSH inequality: any local hidden-variable theory obeys \(|S|\le2\). Quantum mechanics predicts up to \(2\sqrt2 \approx 2.83\).`,
+  explore: R`
+    <p>Make two particles together in an entangled state and send them far apart. Measure the same property on each, and the results are perfectly correlated, no matter the distance.</p>
+    <p>In 1935 Einstein, Podolsky and Rosen argued this meant quantum mechanics was incomplete. Surely each particle carried "instructions" from the start, like a pair of gloves split into two boxes: open one, find a left glove, and you instantly know the other is right. No spooky influence is needed.</p>
+    <p>For thirty years this seemed like a matter of interpretation. Then in 1964 John Bell showed it was testable. If particles carry pre-set instructions and nothing travels faster than light, then correlations measured at <em>different</em> detector angles obey a strict limit. Quantum mechanics predicts that limit is broken.</p>
+    <p>Experiments starting in the 1970s found it broken, just as quantum theory predicts. In 2015 three groups (in Delft, Vienna and Boulder) did it while closing the main loopholes at once. The 2022 Nobel Prize went to Alain Aspect, John Clauser and Anton Zeilinger for this work.</p>
+    <p class="callout">Entanglement can't be used to send a message faster than light. Each side alone sees random results; the correlation appears only when the records are compared.</p>`,
+  math: R`
+    <h3>The setup</h3>
+    <p>Alice picks a detector setting \(a\) or \(a'\); Bob picks \(b\) or \(b'\). Each result is \(\pm1\). Let \(E(a,b)\) be the average product of their results. Define</p>
+    \[ S = E(a,b) - E(a,b') + E(a',b) + E(a',b') \]
+    <h3>The classical limit</h3>
+    <p>If hidden instructions fix values \(A, A', B, B' \in \{\pm1\}\) for every setting, then for each pair</p>
+    \[ A(B - B') + A'(B + B') \]
+    <p>One of \(B - B'\) and \(B + B'\) is 0, the other is \(\pm2\), so this quantity is always \(\pm2\). Averaging over many pairs gives</p>
+    \[ |S| \le 2 \]
+    <h3>The quantum prediction</h3>
+    <p>For the entangled spin singlet \(|\psi\rangle = \tfrac{1}{\sqrt2}(|{\uparrow\downarrow}\rangle - |{\downarrow\uparrow}\rangle)\), the correlation between detectors at angle \(\theta\) apart is</p>
+    \[ E(\theta) = -\cos\theta \]
+    <p>Choose \(a = 0^\circ,\ a' = 90^\circ,\ b = 45^\circ,\ b' = 135^\circ\). Then</p>
+    \[ |S| = \left| -\cos 45^\circ + \cos 135^\circ - \cos 45^\circ - \cos 45^\circ \right| = 4 \cdot \tfrac{\sqrt2}{2} = 2\sqrt{2} \approx 2.83 \]
+    <p>This is the largest value quantum mechanics allows (Tsirelson's bound). The 2015 Delft experiment measured \(S = 2.42 \pm 0.20\) with electrons 1.3 km apart.</p>`,
+  history: [
+    ['1935', 'The EPR paradox', 'Einstein, Podolsky and Rosen argue quantum mechanics must be incomplete.'],
+    ['1964', 'Bell\'s theorem', 'John Bell derives an inequality that any local hidden-variable theory must obey.'],
+    ['1969', 'CHSH', 'Clauser, Horne, Shimony and Holt reformulate it into a form real experiments can test.'],
+    ['1982', 'Aspect\'s experiment', 'Alain Aspect\'s team switches detector settings while photons are in flight and finds a clear violation.'],
+    ['2015', 'Loophole-free tests', 'Groups in Delft, Vienna and NIST Boulder close the detection and locality loopholes together.'],
+    ['2022', 'Nobel Prize', 'Aspect, Clauser and Zeilinger are honored for experiments with entangled photons.']
+  ],
+  papers: [
+    { a: 'A. Einstein, B. Podolsky, N. Rosen', y: 1935, t: 'Can Quantum-Mechanical Description of Physical Reality Be Considered Complete?', j: 'Physical Review 47, 777', url: 'https://doi.org/10.1103/PhysRev.47.777', why: 'The paper that started the debate.' },
+    { a: 'J. S. Bell', y: 1964, t: 'On the Einstein Podolsky Rosen Paradox', j: 'Physics 1(3), 195–200', url: 'https://doi.org/10.1103/PhysicsPhysiqueFizika.1.195', why: 'Bell\'s theorem.' },
+    { a: 'A. Aspect, J. Dalibard, G. Roger', y: 1982, t: 'Experimental Test of Bell\'s Inequalities Using Time-Varying Analyzers', j: 'Physical Review Letters 49, 1804', url: 'https://doi.org/10.1103/PhysRevLett.49.1804', why: 'A landmark test with settings changed during flight.' },
+    { a: 'B. Hensen et al.', y: 2015, t: 'Loophole-free Bell inequality violation using electron spins separated by 1.3 kilometres', j: 'Nature 526, 682–686', url: 'https://doi.org/10.1038/nature15759', why: 'The first loophole-free test. Free on arXiv as 1508.05949.' }
+  ],
+  quiz: [
+    { q: 'What is the maximum value of |S| for any local hidden-variable theory?', o: ['1', '2', '2√2', '4'], a: 1, e: 'Each term A(B−B′)+A′(B+B′) equals ±2, so the average can\'t exceed 2.' },
+    { q: 'What is the largest value quantum mechanics allows?', o: ['2', '2√2 ≈ 2.83', '3', '4'], a: 1, e: 'Tsirelson\'s bound, 2√2, reached with detector angles 45° apart.' },
+    { q: 'Can entanglement be used to send a message faster than light?', o: ['Yes, instantly', 'Yes, but only over short distances', 'No: each side\'s results alone look random', 'Only with photons'], a: 2, e: 'This is the no-signaling theorem. Correlations only show up when results are compared over a normal channel.' }
+  ],
+  related: ['casimir', 'bec']
+},
+{
+  id: 'phyllo', field: 'Mathematics', year: '1979',
+  title: 'The golden angle in a sunflower',
+  fact: R`Sunflower seeds are placed 137.5° apart, the "golden angle," and the spirals you can count almost always come in consecutive Fibonacci numbers such as 34 and 55.`,
+  teaser: R`Change that angle by half a degree and the pattern falls apart. Try it below.`,
+  eq: R`\[ \theta = 360^\circ\left(1 - \frac{1}{\varphi}\right) \approx 137.508^\circ \]`,
+  eqcap: R`The golden angle, where \(\varphi = (1+\sqrt5)/2 \approx 1.618\) is the golden ratio.`,
+  figure: 'phyllo',
+  explore: R`
+    <p>Look at a sunflower head and your eye picks out spirals: some winding clockwise, others counter-clockwise. Count them and you typically get pairs like 21 and 34, 34 and 55, or 55 and 89. These are consecutive Fibonacci numbers, where each is the sum of the two before.</p>
+    <p>The pattern comes from a simple growth rule. New seeds form at the center, one at a time, each rotated by a fixed angle from the last, and older seeds get pushed outward. If that angle were a simple fraction of a turn, say 1/4, seeds would line up in 4 straight spokes and waste most of the space. To pack seeds well the angle must avoid every simple fraction.</p>
+    <p>The golden ratio is, in a precise sense, the hardest number to approximate with fractions. Turning by the golden fraction of a circle gives the most even packing, and the spirals that appear are set by the Fibonacci fractions that best approximate φ.</p>
+    <p>Plants don't compute φ. Each new bud forms where there is the most room, away from the existing buds, and that local rule settles into the golden angle. In 1992 physicists reproduced it with drops of magnetic fluid falling into a dish.</p>`,
+  math: R`
+    <h3>Vogel's model</h3>
+    <p>Place seed \(n\) at polar coordinates</p>
+    \[ r_n = c\sqrt{n}, \qquad \theta_n = n \cdot 137.508^\circ \]
+    <p>The \(\sqrt n\) radius keeps the density of seeds constant, because the area of a disk grows like \(r^2\).</p>
+    <h3>The golden angle</h3>
+    \[ \varphi = \frac{1+\sqrt5}{2}, \qquad \varphi^2 = \varphi + 1 \]
+    \[ 360^\circ \cdot \frac{1}{\varphi^2} = 360^\circ \left( 1 - \frac{1}{\varphi} \right) \approx 137.508^\circ \]
+    <h3>The "most irrational" number</h3>
+    <p>Every number has a continued fraction. The golden ratio's is all 1s, the slowest possible to converge:</p>
+    \[ \varphi = 1 + \cfrac{1}{1 + \cfrac{1}{1 + \cfrac{1}{1 + \cdots}}} \]
+    <p>Its best approximations are ratios of Fibonacci numbers, \(F_{n+1}/F_n\): \(\tfrac{2}{1}, \tfrac{3}{2}, \tfrac{5}{3}, \tfrac{8}{5}, \tfrac{13}{8}, \dots\) Hurwitz's theorem says every irrational \(x\) has infinitely many fractions with \(|x - p/q| < \frac{1}{\sqrt5\,q^2}\), and \(\sqrt5\) cannot be improved precisely because of φ.</p>
+    <h3>Where the Fibonacci spirals come from</h3>
+    <p>Seeds \(n\) and \(n + F_k\) end up near each other, because \(F_k \cdot \theta\) is nearly a whole number of turns. These neighbors line up into visible spirals, so the spiral counts are Fibonacci numbers. Which pair you see depends on the distance from the center.</p>`,
+  history: [
+    ['1202', 'Fibonacci\'s rabbits', 'Leonardo of Pisa\'s Liber Abaci introduces the sequence through a puzzle about breeding rabbits.'],
+    ['1830s', 'Spirals described', 'Botanists Karl Schimper and Alexander Braun describe spiral leaf arrangements and their Fibonacci counts.'],
+    ['1868', 'Hofmeister\'s rule', 'Wilhelm Hofmeister observes new buds form in the largest gap between existing ones.'],
+    ['1979', 'Vogel\'s formula', 'Helmut Vogel publishes the simple √n, golden-angle model of the sunflower.'],
+    ['1992', 'Physics in a dish', 'Stéphane Douady and Yves Couder reproduce phyllotaxis with ferrofluid drops that repel one another.'],
+    ['2016', 'Turing\'s Sunflowers', 'A citizen-science project counts 657 sunflowers: about 1 in 5 show non-Fibonacci or more complex patterns.']
+  ],
+  papers: [
+    { a: 'H. Vogel', y: 1979, t: 'A better way to construct the sunflower head', j: 'Mathematical Biosciences 44(3–4), 179–189', url: 'https://doi.org/10.1016/0025-5564(79)90080-4', why: 'The model drawn in the figure.' },
+    { a: 'S. Douady, Y. Couder', y: 1992, t: 'Phyllotaxis as a physical self-organized growth process', j: 'Physical Review Letters 68, 2098', url: 'https://doi.org/10.1103/PhysRevLett.68.2098', why: 'Shows the golden angle emerges from a simple repulsion rule.' },
+    { a: 'J. Swinton, E. Ochu et al.', y: 2016, t: 'Novel Fibonacci and non-Fibonacci structure in the sunflower', j: 'Royal Society Open Science 3, 160091', url: 'https://doi.org/10.1098/rsos.160091', why: 'Large real-world count of sunflower spirals, honoring Alan Turing\'s unfinished work.' }
+  ],
+  quiz: [
+    { q: 'What is the golden angle, to one decimal place?', o: ['90.0°', '120.0°', '137.5°', '161.8°'], a: 2, e: '360°/φ² ≈ 137.508°.' },
+    { q: 'Why does the golden ratio give the best seed packing?', o: ['It is a rational number', 'It is the hardest number to approximate by fractions', 'It equals π/2', 'It is the largest irrational number'], a: 1, e: 'Its continued fraction is all 1s, so no simple fraction of a turn ever lines the seeds up.' },
+    { q: 'If you count clockwise and counter-clockwise spirals on a typical sunflower, you might find...', o: ['30 and 60', '34 and 55', '40 and 50', '36 and 64'], a: 1, e: '34 and 55 are consecutive Fibonacci numbers.' }
+  ],
+  related: ['benford', 'basel']
+},
+{
+  id: 'hawking', field: 'Physics', year: '1974',
+  title: 'Black holes glow',
+  fact: R`Black holes aren't completely black. They glow faintly and slowly evaporate. A black hole with the Sun's mass sits at about 60 billionths of a kelvin, colder than empty space.`,
+  teaser: R`Stephen Hawking combined quantum theory and general relativity and found that black holes have a temperature.`,
+  eq: R`\[ T_H = \frac{\hbar c^3}{8\pi G M k_B} \]`,
+  eqcap: R`The Hawking temperature. Every fundamental constant appears in one formula, and bigger black holes are colder.`,
+  explore: R`
+    <p>Classically, nothing escapes a black hole. In 1974 Stephen Hawking applied quantum field theory near the event horizon and found something unexpected: black holes emit a steady glow of thermal radiation, as if they were hot objects.</p>
+    <p>A popular picture: empty space constantly produces pairs of "virtual" particles that briefly appear and annihilate. Near the horizon, one member of a pair can fall in while the other escapes. To an outside observer the black hole radiates, and the energy comes from its mass. (The real calculation is about how the horizon distorts quantum fields; the pair picture is a helpful cartoon.)</p>
+    <p>The temperature is inversely proportional to the mass. A solar-mass black hole is at about 60 nanokelvin, far colder than the 2.7 K cosmic microwave background, so today it absorbs more than it emits. Only after the universe cools much further will such black holes begin to shrink, taking about 10⁶⁷ years to vanish.</p>
+    <p>Hawking radiation also creates the <em>information paradox</em>. If a black hole evaporates into purely thermal radiation, what happens to the information about everything that fell in? Quantum mechanics says information can't be destroyed. The question is still debated.</p>`,
+  math: R`
+    <h3>Temperature</h3>
+    \[ T_H = \frac{\hbar c^3}{8\pi G M k_B} \approx 6.2\times10^{-8}\ \text{K} \times \frac{M_\odot}{M} \]
+    <p>Halve the mass and the temperature doubles. As a black hole radiates it gets hotter and radiates faster, so evaporation ends in a final burst.</p>
+    <h3>Entropy: the area law</h3>
+    <p>Jacob Bekenstein argued that black holes carry entropy proportional to the horizon area \(A\). Hawking's temperature fixed the constant:</p>
+    \[ S_{BH} = \frac{k_B\, c^3 A}{4 G \hbar} = \frac{k_B A}{4\,\ell_P^2} \]
+    <p>Entropy scales with <em>area</em>, not volume. This hint inspired the holographic principle.</p>
+    <h3>Lifetime</h3>
+    <p>Treating the black hole as a blackbody with \(P \propto A T^4 \propto M^2 \cdot M^{-4} = M^{-2}\), we get \(dM/dt \propto -M^{-2}\), which integrates to</p>
+    \[ t_{\text{evap}} \approx \frac{5120\,\pi G^2 M^3}{\hbar c^4} \approx 2\times10^{67}\ \text{years} \left(\frac{M}{M_\odot}\right)^3 \]
+    <p>The \(M^3\) scaling means a black hole of about \(2\times10^{11}\) kg, the mass of a mountain, would evaporate in roughly the age of the universe.</p>`,
+  history: [
+    ['1972', 'Bekenstein\'s entropy', 'Graduate student Jacob Bekenstein proposes that black hole entropy is proportional to horizon area. Many, including Hawking, are skeptical.'],
+    ['1974', 'Black hole explosions?', 'Hawking announces in Nature that black holes emit thermal radiation.'],
+    ['1975', 'The full derivation', 'Hawking publishes the detailed calculation in Communications in Mathematical Physics.'],
+    ['1976', 'Information paradox', 'Hawking argues evaporation destroys information, starting a debate lasting decades.'],
+    ['2019', 'Lab analogue', 'Jeff Steinhauer\'s group observes thermal Hawking-like radiation in a sonic black hole made from a Bose–Einstein condensate.']
+  ],
+  papers: [
+    { a: 'S. W. Hawking', y: 1974, t: 'Black hole explosions?', j: 'Nature 248, 30–31', url: 'https://doi.org/10.1038/248030a0', why: 'The two-page announcement.' },
+    { a: 'S. W. Hawking', y: 1975, t: 'Particle creation by black holes', j: 'Communications in Mathematical Physics 43, 199–220', url: 'https://doi.org/10.1007/BF02345020', why: 'The full calculation.' },
+    { a: 'J. D. Bekenstein', y: 1973, t: 'Black Holes and Entropy', j: 'Physical Review D 7, 2333', url: 'https://doi.org/10.1103/PhysRevD.7.2333', why: 'The area–entropy proposal that Hawking\'s result confirmed.' }
+  ],
+  quiz: [
+    { q: 'How does a black hole\'s temperature change as it loses mass?', o: ['It gets colder', 'It gets hotter', 'It stays the same', 'It drops to absolute zero'], a: 1, e: 'T ∝ 1/M, so evaporation speeds up as the hole shrinks.' },
+    { q: 'Black hole entropy is proportional to...', o: ['Its volume', 'Its mass', 'Its horizon area', 'Its spin'], a: 2, e: 'S = k_B c³A / (4Għ), the Bekenstein–Hawking area law.' },
+    { q: 'Why is a solar-mass black hole not shrinking today?', o: ['It is too hot', 'It is colder than the cosmic microwave background, so it absorbs more than it emits', 'Hawking radiation was disproved', 'Its spin prevents it'], a: 1, e: 'At ~60 nK it is colder than the 2.7 K CMB, so it gains energy on balance.' }
+  ],
+  related: ['gw', 'bec']
+},
+{
+  id: 'fourcolor', field: 'Mathematics', year: '1852',
+  title: 'Four colors are enough for any map',
+  fact: R`Any map, however tangled, can be colored with just four colors so that no two bordering regions share a color. The 1976 proof was the first major theorem that needed a computer.`,
+  teaser: R`It took 124 years, a famous false proof, and about 1,200 hours of computer time.`,
+  eq: R`\[ \chi(G) \le 4 \ \text{ for every planar graph } G \]`,
+  eqcap: R`The chromatic number \(\chi\) of any graph drawn without crossing edges is at most 4.`,
+  explore: R`
+    <p>In 1852 Francis Guthrie was coloring a map of the counties of England and noticed he never needed more than four colors. He asked whether that is always true. The question passed from his brother to Augustus De Morgan and became one of the most famous problems in mathematics.</p>
+    <p>Three colors are not enough: picture a region surrounded by an odd number of neighbors, like a wheel. Five colors are always enough, and that proof fits on a page. Four was the stubborn case.</p>
+    <p>In 1879 Alfred Kempe published a proof that was accepted for 11 years until Percy Heawood found a subtle flaw. Kempe's idea survived, though: show that every map must contain one of a small set of "unavoidable" patterns, and that each pattern is "reducible," meaning any coloring of the smaller map can be extended to it.</p>
+    <p>Kenneth Appel and Wolfgang Haken made this work in 1976, but their unavoidable set had about 1,900 configurations, each checked by computer. Many mathematicians were uneasy with a proof no human could fully verify. A simpler computer proof came in 1997, and in 2005 the whole argument was checked line by line by the proof assistant Coq.</p>`,
+  math: R`
+    <h3>From maps to graphs</h3>
+    <p>Put a dot in each region and connect two dots when their regions share a border. The result is a <em>planar graph</em>, one that can be drawn without crossing edges. Coloring the map is coloring the vertices so that adjacent vertices differ.</p>
+    <h3>Euler's formula does the heavy lifting</h3>
+    <p>For a connected planar graph with \(V\) vertices, \(E\) edges and \(F\) faces:</p>
+    \[ V - E + F = 2 \]
+    <p>Every face has at least 3 edges and each edge borders 2 faces, so \(3F \le 2E\). Substituting:</p>
+    \[ E \le 3V - 6 \]
+    <p>The average degree is \(2E/V < 6\), so <strong>every planar graph has a vertex with at most 5 neighbors</strong>.</p>
+    <h3>The six-color theorem (easy)</h3>
+    <p>Remove a vertex of degree \(\le 5\), color the rest by induction, and put the vertex back. Its at most 5 neighbors use at most 5 colors, leaving a sixth free.</p>
+    <h3>The five-color theorem (Heawood, 1890)</h3>
+    <p>If the removed vertex has 5 neighbors using 5 different colors, Kempe's trick swaps two colors along a chain of alternating vertices to free one up. This works for 5 colors but fails for 4 in a subtle case, which is exactly where Kempe went wrong.</p>
+    <h3>Four colors</h3>
+    <p>The proof finds an unavoidable set of configurations (Robertson, Sanders, Seymour and Thomas used 633) and proves each one reducible by computer search.</p>`,
+  history: [
+    ['1852', 'Guthrie\'s question', 'Francis Guthrie notices four colors suffice for a map of England.'],
+    ['1879', 'Kempe\'s proof', 'Alfred Kempe publishes a proof. It is widely accepted.'],
+    ['1890', 'The flaw', 'Percy Heawood finds the error in Kempe\'s argument and proves the five-color theorem instead.'],
+    ['1976', 'Appel and Haken', 'Using about 1,200 hours of computer time, they check roughly 1,900 configurations. The University of Illinois postmark reads "Four colors suffice."'],
+    ['1997', 'A cleaner proof', 'Robertson, Sanders, Seymour and Thomas reduce it to 633 configurations.'],
+    ['2005', 'Formally verified', 'Georges Gonthier checks the entire proof in the Coq proof assistant.']
+  ],
+  papers: [
+    { a: 'K. Appel, W. Haken', y: 1977, t: 'Every planar map is four colorable. Part I: Discharging', j: 'Illinois Journal of Mathematics 21(3), 429–490', url: '', why: 'The first proof.' },
+    { a: 'N. Robertson, D. Sanders, P. Seymour, R. Thomas', y: 1997, t: 'The Four-Colour Theorem', j: 'Journal of Combinatorial Theory, Series B 70(1), 2–44', url: 'https://doi.org/10.1006/jctb.1997.1750', why: 'The simplified modern proof.' },
+    { a: 'G. Gonthier', y: 2008, t: 'Formal Proof—The Four-Color Theorem', j: 'Notices of the AMS 55(11), 1382–1393', url: 'https://www.ams.org/notices/200811/tx081101382p.pdf', why: 'A readable account of the machine-checked proof.' }
+  ],
+  quiz: [
+    { q: 'Who found the flaw in Kempe\'s 1879 proof?', o: ['Augustus De Morgan', 'Percy Heawood', 'Kenneth Appel', 'Leonhard Euler'], a: 1, e: 'Heawood found it in 1890 and salvaged a five-color theorem.' },
+    { q: 'What does Euler\'s formula imply about every planar graph?', o: ['It has a vertex with at most 5 neighbors', 'It has no triangles', 'It has an even number of vertices', 'It can be 3-colored'], a: 0, e: 'E ≤ 3V − 6 forces the average degree below 6.' },
+    { q: 'Why was the 1976 proof controversial?', o: ['It used a different definition of map', 'Parts were checked by computer and couldn\'t be verified by hand', 'It assumed the Continuum Hypothesis', 'It was published anonymously'], a: 1, e: 'Checking ~1,900 configurations by hand was impractical, raising questions about what counts as proof.' }
+  ],
+  related: ['cantor', 'fermat']
+},
+{
+  id: 'lorenz', field: 'Mathematics', year: '1963',
+  title: 'The rounding error that discovered chaos',
+  fact: R`In 1961 Edward Lorenz restarted a weather simulation using 0.506 instead of 0.506127. Within a couple of simulated months the forecast was completely different. He had discovered chaos.`,
+  teaser: R`Three simple equations, perfectly deterministic, yet impossible to predict far ahead. Watch two nearly identical starts split apart.`,
+  eq: R`\[ \dot x = \sigma(y-x),\ \ \dot y = x(\rho - z) - y,\ \ \dot z = xy - \beta z \]`,
+  eqcap: R`The Lorenz system, with the classic values \(\sigma = 10,\ \rho = 28,\ \beta = 8/3\).`,
+  figure: 'lorenz',
+  explore: R`
+    <p>Edward Lorenz was a meteorologist at MIT running a simple weather model on a Royal McBee computer. Wanting to re-examine a run, he typed in numbers from a printout and started midway. The printout showed three decimal places; the computer stored six. That tiny difference grew until the new forecast bore no resemblance to the old one.</p>
+    <p>Lorenz realized this was not a bug but a property of the equations. In a <em>chaotic</em> system, nearby starting points separate exponentially fast. The future is fully determined by the present, but the present can never be measured precisely enough to predict far ahead.</p>
+    <p>He boiled the model down to three equations describing a fluid heated from below. Their solutions trace out the famous butterfly-shaped <em>Lorenz attractor</em>: the motion stays on this shape forever, never repeating, flipping unpredictably between the two wings.</p>
+    <p class="callout">Chaos is why weather forecasts lose skill after about 10 to 14 days, no matter how powerful the computers get.</p>`,
+  math: R`
+    <h3>The equations</h3>
+    \[ \begin{aligned} \frac{dx}{dt} &= \sigma(y - x) \\ \frac{dy}{dt} &= x(\rho - z) - y \\ \frac{dz}{dt} &= xy - \beta z \end{aligned} \]
+    <p>Here \(x\) is the rate of convection, \(y\) the horizontal temperature difference and \(z\) the vertical temperature profile. With \(\sigma=10\), \(\beta=8/3\), the motion becomes chaotic for \(\rho\) above about 24.74. Lorenz used \(\rho = 28\).</p>
+    <h3>Exponential divergence</h3>
+    <p>Two trajectories starting a distance \(\delta_0\) apart separate roughly as</p>
+    \[ |\delta(t)| \approx |\delta_0|\, e^{\lambda t} \]
+    <p>where \(\lambda \approx 0.906\) is the largest Lyapunov exponent of the Lorenz system. A positive \(\lambda\) is the signature of chaos.</p>
+    <h3>The predictability horizon</h3>
+    <p>If the error is acceptable up to size \(\Delta\), the forecast is useful for</p>
+    \[ t_{\text{pred}} \approx \frac{1}{\lambda}\ln\frac{\Delta}{\delta_0} \]
+    <p>The logarithm is the cruel part: making your initial measurement 1,000 times more precise adds only \(\ln(1000)/\lambda \approx 7.6\) time units. Better measurements buy time slowly.</p>
+    <h3>A strange attractor</h3>
+    <p>Volumes in phase space shrink at rate \(-(\sigma + 1 + \beta) \approx -13.7\), so trajectories collapse onto a set of zero volume. That set has fractal dimension about 2.06: more than a surface, less than a solid.</p>`,
+  history: [
+    ['1890', 'Poincaré sees it first', 'Studying three gravitating bodies, Henri Poincaré finds orbits so tangled that tiny changes alter the outcome.'],
+    ['1961', 'The rounding error', 'Lorenz restarts a simulation with rounded inputs and sees the forecast diverge.'],
+    ['1963', 'Deterministic Nonperiodic Flow', 'Lorenz publishes the three equations and their strange attractor in a meteorology journal. It goes largely unnoticed by mathematicians for a decade.'],
+    ['1972', 'The butterfly', 'His talk "Does the flap of a butterfly\'s wings in Brazil set off a tornado in Texas?" names the butterfly effect.'],
+    ['1975', '"Chaos" is named', 'Tien-Yien Li and James Yorke\'s paper "Period Three Implies Chaos" gives the field its name.'],
+    ['2002', 'Proof the attractor exists', 'Warwick Tucker uses a computer-assisted proof to solve Smale\'s 14th problem: the Lorenz attractor is genuinely strange.']
+  ],
+  papers: [
+    { a: 'E. N. Lorenz', y: 1963, t: 'Deterministic Nonperiodic Flow', j: 'Journal of the Atmospheric Sciences 20(2), 130–141', url: 'https://doi.org/10.1175/1520-0469(1963)020<0130:DNF>2.0.CO;2', why: 'The founding paper of chaos theory.' },
+    { a: 'T.-Y. Li, J. A. Yorke', y: 1975, t: 'Period Three Implies Chaos', j: 'American Mathematical Monthly 82(10), 985–992', url: '', why: 'Introduces the word "chaos" in its mathematical sense.' },
+    { a: 'W. Tucker', y: 2002, t: 'A Rigorous ODE Solver and Smale\'s 14th Problem', j: 'Foundations of Computational Mathematics 2, 53–117', url: '', why: 'Proves the Lorenz attractor exists using interval arithmetic.' }
+  ],
+  quiz: [
+    { q: 'What did Lorenz change when he restarted his simulation?', o: ['The time step', 'He rounded 6 decimal places to 3', 'The equations', 'The computer'], a: 1, e: 'He entered 0.506 instead of 0.506127, a difference of about 0.025%.' },
+    { q: 'If you measure the initial state 1,000 times more precisely, the prediction horizon...', o: ['Grows 1,000 times', 'Grows by a fixed amount, ∝ ln(1000)', 'Doesn\'t change', 'Doubles'], a: 1, e: 't ≈ (1/λ)·ln(Δ/δ₀): precision only adds time logarithmically.' },
+    { q: 'What is the Lorenz system\'s classic value of ρ?', o: ['1', '8/3', '10', '28'], a: 3, e: 'σ = 10, ρ = 28, β = 8/3.' }
+  ],
+  related: ['benford', 'phyllo']
+},
+{
+  id: 'casimir', field: 'Physics', year: '1948',
+  title: 'Empty space pushes back',
+  fact: R`Two uncharged metal plates in a perfect vacuum are pushed together by the energy of empty space itself. At 10 nm apart, the pressure is about one atmosphere.`,
+  teaser: R`This is the Casimir effect. Its calculation needs the "sum" 1 + 8 + 27 + 64 + ... = 1/120.`,
+  eq: R`\[ \frac{F}{A} = -\frac{\pi^2 \hbar c}{240\, a^4} \]`,
+  eqcap: R`The Casimir pressure between ideal parallel plates separated by distance \(a\).`,
+  explore: R`
+    <p>Quantum mechanics says a vacuum is never truly empty. Each possible mode of the electromagnetic field has a minimum "zero-point" energy, \(\tfrac12\hbar\omega\), even with no photons present.</p>
+    <p>Put two parallel conducting plates very close together. Between them, only waves that fit exactly (with nodes at both plates) are allowed. Outside, every wavelength is allowed. There are fewer modes inside than outside, so there is less vacuum energy between the plates, and they are pushed together.</p>
+    <p>Hendrik Casimir predicted this in 1948 while studying forces between molecules at Philips Research. The force is tiny at everyday distances but grows as \(1/a^4\): at 10 nanometers it reaches about 1.3 atmospheres. It was measured accurately only in 1997.</p>
+    <p class="callout">At the nanoscale, Casimir forces can make the moving parts of micro-machines stick together, a real engineering problem.</p>`,
+  math: R`
+    <h3>Modes between the plates</h3>
+    <p>For plates separated by \(a\), the allowed wavenumbers perpendicular to the plates are \(k_z = n\pi/a\) with \(n = 1, 2, 3, \dots\) Each mode contributes zero-point energy</p>
+    \[ E_{\text{mode}} = \tfrac12 \hbar \omega = \tfrac12 \hbar c\, |\mathbf{k}| \]
+    <p>Summed over all modes, the total is infinite both inside and outside. The physical quantity is the <em>difference</em>, which is finite.</p>
+    <h3>A famous "sum"</h3>
+    <p>Regularizing the sum, the key step is evaluating \(\sum n^3\) using the Riemann zeta function, analytically continued from the Basel-type sums \(\zeta(s) = \sum n^{-s}\):</p>
+    \[ \text{“}\,1 + 8 + 27 + 64 + \cdots\,\text{”} \;\to\; \zeta(-3) = \frac{1}{120} \]
+    <p>The divergent series doesn't literally equal 1/120. Rather, removing the physically meaningless infinite part leaves exactly this value.</p>
+    <h3>The result</h3>
+    <p>The energy per unit area is</p>
+    \[ \frac{E}{A} = -\frac{\pi^2 \hbar c}{720\, a^3} \]
+    <p>and the pressure is its derivative with respect to \(a\):</p>
+    \[ P = -\frac{\partial}{\partial a}\left(\frac{E}{A}\right) = -\frac{\pi^2\hbar c}{240\,a^4} \]
+    <h3>Plugging in 10 nm</h3>
+    \[ |P| = \frac{(9.87)(3.16\times10^{-26}\ \text{J·m})}{240\,(10^{-8}\ \text{m})^4} \approx 1.3\times10^{5}\ \text{Pa} \approx 1.3\ \text{atm} \]`,
+  history: [
+    ['1947', 'Casimir and Polder', 'Studying why colloids clump, Casimir and Dirk Polder compute retarded van der Waals forces.'],
+    ['1948', 'The plate prediction', 'After a conversation with Niels Bohr about zero-point energy, Casimir derives the force between two plates.'],
+    ['1958', 'First attempt', 'Marcus Sparnaay sees a force consistent with the prediction, but with very large uncertainty.'],
+    ['1997', 'Measured', 'Steve Lamoreaux confirms the effect to within about 5% using a torsion pendulum.'],
+    ['1998', 'Precision', 'Umar Mohideen and Anushree Roy measure it to about 1% with an atomic force microscope.']
+  ],
+  papers: [
+    { a: 'H. B. G. Casimir', y: 1948, t: 'On the attraction between two perfectly conducting plates', j: 'Proceedings of the KNAW 51, 793–795', url: '', why: 'The original three-page prediction.' },
+    { a: 'S. K. Lamoreaux', y: 1997, t: 'Demonstration of the Casimir Force in the 0.6 to 6 μm Range', j: 'Physical Review Letters 78, 5', url: 'https://doi.org/10.1103/PhysRevLett.78.5', why: 'The first precise measurement.' },
+    { a: 'U. Mohideen, A. Roy', y: 1998, t: 'Precision Measurement of the Casimir Force from 0.1 to 0.9 μm', j: 'Physical Review Letters 81, 4549', url: 'https://doi.org/10.1103/PhysRevLett.81.4549', why: 'An AFM measurement at the 1% level.' }
+  ],
+  quiz: [
+    { q: 'How does the Casimir pressure depend on plate separation a?', o: ['1/a', '1/a²', '1/a⁴', 'It is constant'], a: 2, e: 'P ∝ 1/a⁴: halving the gap multiplies the pressure by 16.' },
+    { q: 'Why are the plates pushed together?', o: ['Static electric charge', 'Gravity between the plates', 'Fewer vacuum modes fit between the plates than outside', 'Air pressure'], a: 2, e: 'The gap restricts which wavelengths are allowed, lowering the vacuum energy there.' },
+    { q: 'Which value of the zeta function appears in the calculation?', o: ['ζ(2) = π²/6', 'ζ(−3) = 1/120', 'ζ(−1) = −1/12', 'ζ(3) ≈ 1.202'], a: 1, e: 'The regularized sum of n³ is ζ(−3) = 1/120, giving the 720 and 240 in the formulas.' }
+  ],
+  related: ['basel', 'bell']
+},
+{
+  id: 'fermat', field: 'Mathematics', year: '1637',
+  title: 'The margin that was too small',
+  fact: R`In 1637 Pierre de Fermat wrote in a book's margin that he had a "truly marvelous proof" that xⁿ + yⁿ = zⁿ has no whole-number solutions for n > 2. Proving it took 358 years.`,
+  teaser: R`The final proof, by Andrew Wiles, runs through elliptic curves and modular forms, mathematics Fermat couldn't have imagined.`,
+  eq: R`\[ x^n + y^n = z^n \quad\text{has no solutions in positive integers for } n > 2 \]`,
+  eqcap: R`Fermat's Last Theorem. For \(n = 2\) there are infinitely many solutions, the Pythagorean triples.`,
+  explore: R`
+    <p>Fermat was reading an ancient Greek text, Diophantus' <em>Arithmetica</em>, next to a problem about writing a square as the sum of two squares. In the margin he claimed that cubes, fourth powers and all higher powers could never be split this way, adding: "I have discovered a truly marvelous proof of this, which this margin is too narrow to contain."</p>
+    <p>His son published the notes after his death. One by one, mathematicians proved or disproved Fermat's other claims. This one held out, earning the name "Last Theorem." Euler proved the case n = 3; others handled 5, 7, and eventually large families of exponents, but never all of them.</p>
+    <p>The breakthrough came from an unexpected direction. In the 1980s Gerhard Frey suggested that a solution to Fermat's equation would produce a very strange elliptic curve, and Ken Ribet proved that this curve could not be "modular." So proving that all such curves are modular would prove Fermat.</p>
+    <p>Andrew Wiles worked on this in secret for seven years. He announced a proof in 1993, a gap was found, and with Richard Taylor he repaired it in 1994. Most mathematicians believe Fermat's own "proof" was mistaken.</p>`,
+  math: R`
+    <h3>n = 2 has infinitely many solutions</h3>
+    <p>For any integers \(m > k > 0\):</p>
+    \[ (m^2 - k^2)^2 + (2mk)^2 = (m^2 + k^2)^2 \]
+    <p>For example, \(m=2, k=1\) gives \(3^2 + 4^2 = 5^2\).</p>
+    <h3>Fermat's own proof for n = 4</h3>
+    <p>Fermat did prove the case \(n=4\), using <em>infinite descent</em>: he showed that any solution to \(x^4 + y^4 = z^2\) would produce a smaller one, and so on forever, which is impossible for positive integers. This settles every exponent divisible by 4, so only odd prime exponents \(p\) remain.</p>
+    <h3>The Frey curve</h3>
+    <p>Suppose \(a^p + b^p = c^p\) for an odd prime \(p\). Frey considered the elliptic curve</p>
+    \[ E:\ y^2 = x\,(x - a^p)(x + b^p) \]
+    <p>Its discriminant is essentially \((abc)^{2p}\), a perfect \(p\)-th power, which makes the curve extremely unusual.</p>
+    <h3>The chain of logic</h3>
+    \[ \text{Fermat solution} \;\Rightarrow\; \text{Frey curve } E \;\xRightarrow{\text{Ribet 1986}}\; E \text{ is not modular} \]
+    \[ \text{Wiles 1995: every semistable elliptic curve is modular} \;\Rightarrow\; \text{contradiction} \]
+    <p>So no solution can exist. The full modularity theorem, for all elliptic curves, was completed in 2001 by Breuil, Conrad, Diamond and Taylor.</p>`,
+  history: [
+    ['1637', 'The margin note', 'Fermat writes his claim in his copy of Diophantus\' Arithmetica.'],
+    ['1770', 'Euler: n = 3', 'Leonhard Euler publishes a proof for cubes (with a gap later repaired).'],
+    ['1825', 'n = 5', 'Dirichlet and Legendre independently prove the case n = 5.'],
+    ['1847', 'Kummer\'s ideals', 'Ernst Kummer proves it for all "regular" primes, inventing ideas that reshape algebra.'],
+    ['1986', 'Ribet links it to modularity', 'Ken Ribet proves the Frey curve cannot be modular, turning Fermat into a question about elliptic curves.'],
+    ['1995', 'Wiles completes it', 'After a 1993 announcement and a gap, Wiles and Taylor publish the full proof in Annals of Mathematics.']
+  ],
+  papers: [
+    { a: 'A. Wiles', y: 1995, t: 'Modular elliptic curves and Fermat\'s Last Theorem', j: 'Annals of Mathematics 141(3), 443–551', url: 'https://doi.org/10.2307/2118559', why: 'The 109-page proof.' },
+    { a: 'R. Taylor, A. Wiles', y: 1995, t: 'Ring-theoretic properties of certain Hecke algebras', j: 'Annals of Mathematics 141(3), 553–572', url: 'https://doi.org/10.2307/2118560', why: 'The repair of the gap in the 1993 argument.' },
+    { a: 'K. A. Ribet', y: 1990, t: 'On modular representations of Gal(Q̄/Q) arising from modular forms', j: 'Inventiones Mathematicae 100, 431–476', url: 'https://doi.org/10.1007/BF01231195', why: 'Shows a Fermat solution would give a non-modular curve.' }
+  ],
+  quiz: [
+    { q: 'Which formula generates Pythagorean triples?', o: ['(m+k, m−k, mk)', '(m²−k², 2mk, m²+k²)', '(m², k², m²+k²)', '(2m, 2k, 2m+2k)'], a: 1, e: '(m²−k²)² + (2mk)² = (m²+k²)². For m=2, k=1 this gives 3, 4, 5.' },
+    { q: 'Which case did Fermat himself prove?', o: ['n = 3', 'n = 4', 'n = 5', 'All n'], a: 1, e: 'He proved n = 4 by infinite descent.' },
+    { q: 'Wiles proved Fermat by proving a special case of what?', o: ['The Riemann Hypothesis', 'The Four Color Theorem', 'The modularity theorem for elliptic curves', 'The prime number theorem'], a: 2, e: 'He proved semistable elliptic curves are modular, which rules out the Frey curve.' }
+  ],
+  related: ['fourcolor', 'basel']
+},
+{
+  id: 'bec', field: 'Physics', year: '1924',
+  title: 'When atoms lose their individuality',
+  fact: R`Cool about 2,000 rubidium atoms to 170 billionths of a degree above absolute zero and they stop behaving as separate particles, merging into a single quantum wave.`,
+  teaser: R`Einstein predicted this new state of matter in 1924. It took 71 years and laser cooling to make it.`,
+  eq: R`\[ n\,\lambda_{\text{dB}}^3 \ge \zeta\!\left(\tfrac32\right) \approx 2.612 \]`,
+  eqcap: R`Condensation begins when atoms' quantum wavelengths \(\lambda_{\text{dB}}\) overlap: density \(n\) times wavelength cubed passes about 2.612.`,
+  explore: R`
+    <p>In 1924 the Indian physicist Satyendra Nath Bose sent Einstein a new way to count photons, treating them as truly identical. Einstein translated it into German, got it published, and extended it to atoms. He found something strange: below a critical temperature, a large fraction of atoms should pile into the single lowest-energy state.</p>
+    <p>Every particle has a quantum wavelength that grows as it slows down. At room temperature an atom's wavelength is far smaller than the gap between atoms, so they act like tiny billiard balls. Cooled enough, the wavelengths spread out and overlap, and the atoms become indistinguishable parts of one shared wave: a Bose–Einstein condensate (BEC).</p>
+    <p>Reaching that point took laser cooling (using photons to slow atoms) followed by evaporative cooling (letting the hottest atoms escape a magnetic trap). On 5 June 1995 Eric Cornell and Carl Wieman at JILA in Boulder saw the telltale sharp peak of a condensate. Wolfgang Ketterle at MIT made a much larger one months later. All three shared the 2001 Nobel Prize.</p>
+    <p class="callout">BECs are used to build ultra-precise sensors and atom lasers, to simulate other quantum systems, and even to make analogue black holes in the lab.</p>`,
+  math: R`
+    <h3>The thermal de Broglie wavelength</h3>
+    <p>A particle of mass \(m\) at temperature \(T\) has a typical quantum wavelength</p>
+    \[ \lambda_{\text{dB}} = \frac{h}{\sqrt{2\pi m k_B T}} \]
+    <p>It grows as \(T^{-1/2}\). For rubidium-87 at 170 nK this is about half a micrometer, comparable to the gap between atoms in the trap.</p>
+    <h3>The condensation condition</h3>
+    <p>Bose–Einstein statistics give the average occupation of a state with energy \(\varepsilon\):</p>
+    \[ \bar n(\varepsilon) = \frac{1}{e^{(\varepsilon - \mu)/k_BT} - 1} \]
+    <p>Summing over all excited states, there is a maximum number they can hold. When the density exceeds it, the excess must go into the ground state. For a uniform gas this happens when</p>
+    \[ n\,\lambda_{\text{dB}}^3 = \zeta\!\left(\tfrac32\right) = \sum_{k=1}^{\infty} \frac{1}{k^{3/2}} \approx 2.612 \]
+    <p>The Riemann zeta function appears again, here at \(s = 3/2\).</p>
+    <h3>Critical temperature</h3>
+    \[ T_c = \frac{2\pi\hbar^2}{m k_B}\left( \frac{n}{\zeta(3/2)} \right)^{2/3} \]
+    <p>Below \(T_c\), the condensed fraction grows as</p>
+    \[ \frac{N_0}{N} = 1 - \left(\frac{T}{T_c}\right)^{3/2} \]`,
+  history: [
+    ['1924', 'Bose\'s letter', 'Satyendra Nath Bose derives Planck\'s law by counting photons as identical. Einstein arranges its publication.'],
+    ['1925', 'Einstein\'s prediction', 'Einstein extends Bose\'s counting to atoms and predicts condensation.'],
+    ['1938', 'Superfluid helium', 'Fritz London proposes that the bizarre superfluidity of liquid helium is related to Bose–Einstein condensation.'],
+    ['1980s', 'Laser cooling', 'Techniques developed by Chu, Cohen-Tannoudji and Phillips (Nobel, 1997) cool atoms to microkelvins.'],
+    ['1995', 'First condensates', 'Cornell and Wieman condense rubidium at JILA; Ketterle condenses sodium at MIT.'],
+    ['2001', 'Nobel Prize', 'Cornell, Wieman and Ketterle share the prize "for the achievement of Bose–Einstein condensation."']
+  ],
+  papers: [
+    { a: 'S. N. Bose', y: 1924, t: 'Plancks Gesetz und Lichtquantenhypothese', j: 'Zeitschrift für Physik 26, 178–181', url: 'https://doi.org/10.1007/BF01327326', why: 'The new counting method, translated by Einstein.' },
+    { a: 'M. H. Anderson, J. R. Ensher, M. R. Matthews, C. E. Wieman, E. A. Cornell', y: 1995, t: 'Observation of Bose-Einstein Condensation in a Dilute Atomic Vapor', j: 'Science 269(5221), 198–201', url: 'https://doi.org/10.1126/science.269.5221.198', why: 'The first BEC, in rubidium.' },
+    { a: 'K. B. Davis, M.-O. Mewes, et al., W. Ketterle', y: 1995, t: 'Bose-Einstein Condensation in a Gas of Sodium Atoms', j: 'Physical Review Letters 75, 3969', url: 'https://doi.org/10.1103/PhysRevLett.75.3969', why: 'A much larger condensate, in sodium.' }
+  ],
+  quiz: [
+    { q: 'At about what temperature did the first BEC form?', o: ['4 K', '1 mK', '170 nK', 'Exactly 0 K'], a: 2, e: 'About 170 billionths of a kelvin above absolute zero.' },
+    { q: 'Condensation happens when...', o: ['Atoms stop moving entirely', 'Atoms\' quantum wavelengths become comparable to the spacing between them', 'Atoms become ionized', 'The gas turns solid'], a: 1, e: 'When nλ³ reaches about 2.612, the atomic waves overlap and the ground state fills.' },
+    { q: 'Who first worked out the statistics that BEC is named for?', o: ['Bose and Einstein', 'Bohr and Einstein', 'Fermi and Dirac', 'Planck and Bose'], a: 0, e: 'Bose (1924) for photons, extended by Einstein (1925) to atoms.' }
+  ],
+  related: ['hawking', 'basel']
+}
+];
+
+const ORDER = ['muon', 'cantor', 'tunnel', 'basel', 'gw', 'benford', 'bell', 'phyllo', 'hawking', 'fourcolor', 'casimir', 'lorenz', 'bec', 'fermat'];
+const BY_ID = Object.fromEntries(FACTS.map(f => [f.id, f]));
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('eps:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('eps:' + k, JSON.stringify(v)); } catch {} }
+};
+
+function dayNumber(d = new Date()) {
+  return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(2026, 0, 1)) / 864e5);
+}
+const TODAY = dayNumber();
+const TODAY_ID = ORDER[((TODAY % ORDER.length) + ORDER.length) % ORDER.length];
+
+const state = { id: TODAY_ID, tab: 'explore', filter: store.get('filter', 'All'), answers: {} };
+
+/* ---------- streak & progress ---------- */
+function recordVisit() {
+  const days = new Set(store.get('days', []));
+  days.add(TODAY);
+  const arr = [...days].sort((a, b) => a - b).slice(-400);
+  store.set('days', arr);
+  let streak = 0;
+  while (days.has(TODAY - streak)) streak++;
+  $('#streak').textContent = streak + (streak === 1 ? ' day' : ' days');
+}
+function bestScore(id) { return store.get('quiz:' + id, null); }
+function renderProgress() {
+  const passed = FACTS.filter(f => (bestScore(f.id) ?? -1) >= 2).length;
+  $('#passed').textContent = passed + ' / ' + FACTS.length;
+}
+function tickCountdown() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const s = Math.max(0, Math.floor((next - now) / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  $('#countdown').textContent = h + 'h ' + String(m).padStart(2, '0') + 'm';
+}
+
+/* ---------- math typesetting ---------- */
+function typeset(nodes) {
+  const MJ = window.MathJax;
+  if (!MJ || !MJ.typesetPromise) return;
+  if (MJ.typesetClear) MJ.typesetClear(nodes);
+  MJ.typesetPromise(nodes).catch(() => {});
+}
+window.__typesetAll = () => typeset([$('#hero'), $('#panel')]);
+
+/* ---------- hero ---------- */
+function renderHero() {
+  const f = BY_ID[state.id];
+  const isToday = f.id === TODAY_ID;
+  const hero = $('#hero');
+  hero.className = 'hero ' + f.field;
+  document.documentElement.style.setProperty('--accent', f.field === 'Physics' ? 'var(--phys)' : 'var(--math)');
+  $('#h-field').textContent = f.field;
+  $('#h-field').className = 'tag ' + f.field;
+  $('#h-when').textContent = isToday
+    ? "Today's fact · " + new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+    : 'From the collection';
+  $('#h-title').textContent = f.title;
+  $('#h-fact').innerHTML = f.fact;
+  $('#h-teaser').innerHTML = f.teaser;
+  $('#h-eq').innerHTML = f.eq;
+  $('#h-eqcap').innerHTML = f.eqcap;
+  $('#h-num').textContent = (ORDER.indexOf(f.id) + 1) + ' of ' + FACTS.length;
+  $('#h-year').textContent = f.year;
+  $('#h-papers').textContent = f.papers.length;
+  const b = bestScore(f.id);
+  $('#h-best').textContent = b === null ? 'Not taken' : b + ' / ' + f.quiz.length;
+  $('#go-today').hidden = isToday;
+  $('#d-title').textContent = f.title;
+  typeset([hero]);
+}
+
+/* ---------- panels ---------- */
+function relatedHTML(f) {
+  return '<h3>Connected facts</h3><div class="related">' +
+    f.related.map(id => `<button data-open="${id}">${esc(BY_ID[id].title)} <span class="label">· ${BY_ID[id].field}</span></button>`).join('') +
+    '</div>';
+}
+function figureHTML(kind) {
+  if (kind === 'benford') {
+    const bars = [1,2,3,4,5,6,7,8,9].map(d => {
+      const p = Math.log10(1 + 1 / d);
+      return `<div class="bar"><span>${(p * 100).toFixed(1)}%</span><i style="height:${(p / 0.301 * 78).toFixed(1)}%"></i><b>${d}</b></div>`;
+    }).join('');
+    return `<div class="figure"><div class="bars" role="img" aria-label="Bar chart of Benford probabilities from 30.1% for digit 1 down to 4.6% for digit 9">${bars}</div><p class="fig-cap">Benford's predicted share of each leading digit. A uniform guess would be 11.1% each.</p></div>`;
+  }
+  if (kind === 'phyllo') {
+    return `<div class="figure"><canvas id="phyllo-canvas" aria-label="Sunflower seed pattern drawn with the chosen angle"></canvas>
+      <div class="fig-controls">
+        <label for="phyllo-angle">Angle</label>
+        <input type="range" id="phyllo-angle" min="135" max="140" step="0.01" value="137.51">
+        <output id="phyllo-out" class="mono">137.51°</output>
+      </div>
+      <div class="fig-controls">
+        <button class="chip" id="ph-gold" data-angle="137.508">Golden 137.51°</button>
+        <button class="chip" id="ph-a" data-angle="137.3">137.30°</button>
+        <button class="chip" id="ph-b" data-angle="138">138.00°</button>
+        <button class="chip" id="ph-c" data-angle="137.14">360°×8/21</button>
+      </div>
+      <p class="fig-cap">700 seeds placed by Vogel's model. Move away from the golden angle and gaps or straight spokes appear.</p></div>`;
+  }
+  if (kind === 'lorenz') {
+    return `<div class="figure"><canvas id="lorenz-canvas" class="lorenz" aria-label="Two Lorenz trajectories starting 0.00001 apart"></canvas>
+      <div class="fig-controls"><span>t = <b id="lz-t">0.0</b></span><span>separation = <b id="lz-d">0.00001</b></span><button class="chip" id="lz-restart">Restart</button></div>
+      <p class="fig-cap">Two trajectories (x–z plane) that start 0.00001 apart. They track each other, then suddenly go their own ways.</p></div>`;
+  }
+  return '';
+}
+
+function renderPanel() {
+  const f = BY_ID[state.id];
+  const p = $('#panel');
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === state.tab)));
+  stopLorenz();
+  if (state.tab === 'explore') {
+    p.innerHTML = `<div class="prose">${f.explore}${relatedHTML(f)}</div>`;
+  } else if (state.tab === 'math') {
+    p.innerHTML = `<div class="prose">${f.math}${f.figure ? '<h3>See it</h3>' + figureHTML(f.figure) : ''}</div>`;
+  } else if (state.tab === 'history') {
+    p.innerHTML = '<ol class="timeline">' + f.history.map(([y, h, t]) =>
+      `<li><span class="yr">${esc(y)}</span><div><strong>${esc(h)}</strong>${esc(t)}</div></li>`).join('') + '</ol>';
+  } else if (state.tab === 'papers') {
+    p.innerHTML = '<div class="papers">' + f.papers.map(x => {
+      const scholar = 'https://scholar.google.com/scholar?q=' + encodeURIComponent(x.t + ' ' + x.a.split(',')[0]);
+      return `<article class="paper">
+        <div class="t">${esc(x.t)}</div>
+        <div class="meta">${esc(x.a)} (${x.y}) · <em>${esc(x.j)}</em></div>
+        <p class="why">${esc(x.why)}</p>
+        <div class="links">${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">Open paper ↗</a>` : ''}<a href="${scholar}" target="_blank" rel="noopener">Find on Google Scholar ↗</a></div>
+      </article>`;
+    }).join('') + '</div>';
+  } else if (state.tab === 'quiz') {
+    renderQuiz();
+    return;
+  }
+  typeset([p]);
+  if (state.tab === 'math' && f.figure === 'phyllo') initPhyllo();
+  if (state.tab === 'math' && f.figure === 'lorenz') initLorenz();
+}
+
+/* ---------- quiz ---------- */
+function renderQuiz() {
+  const f = BY_ID[state.id];
+  const ans = state.answers[f.id] || (state.answers[f.id] = []);
+  const p = $('#panel');
+  const done = ans.filter(a => a !== undefined).length;
+  const correct = ans.filter((a, i) => a === f.quiz[i].a).length;
+  let html = '<div class="quiz">';
+  f.quiz.forEach((q, i) => {
+    const picked = ans[i];
+    html += `<div class="q"><h3><span class="n">Q${i + 1}</span>${esc(q.q)}</h3><div class="opts">`;
+    q.o.forEach((o, j) => {
+      let cls = 'opt';
+      if (picked !== undefined) {
+        if (j === q.a) cls += ' right';
+        else if (j === picked) cls += ' wrong';
+      }
+      html += `<button class="${cls}" id="q${i}o${j}" data-q="${i}" data-o="${j}" ${picked !== undefined ? 'disabled' : ''}><span class="k">${'ABCD'[j]}</span><span>${esc(o)}</span></button>`;
+    });
+    html += '</div>';
+    if (picked !== undefined) {
+      const ok = picked === q.a;
+      html += `<p class="explain ${ok ? 'ok' : 'no'}"><b>${ok ? 'Correct.' : 'Not quite.'}</b> ${esc(q.e)}</p>`;
+    }
+    html += '</div>';
+  });
+  if (done === f.quiz.length) {
+    const msg = correct === f.quiz.length ? 'Perfect score.' : correct >= 2 ? 'Passed. Nicely done.' : 'Worth another look at the deep dive.';
+    html += `<div class="score"><span class="big">${correct} / ${f.quiz.length}</span><span>${msg}</span><button class="btn ghost" id="quiz-retake">Retake quiz</button></div>`;
+  } else {
+    html += `<p class="label">${done} of ${f.quiz.length} answered</p>`;
+  }
+  p.innerHTML = html + '</div>';
+}
+function answer(qi, oi) {
+  const f = BY_ID[state.id];
+  const ans = state.answers[f.id];
+  if (ans[qi] !== undefined) return;
+  ans[qi] = oi;
+  if (ans.filter(a => a !== undefined).length === f.quiz.length) {
+    const correct = ans.filter((a, i) => a === f.quiz[i].a).length;
+    const prev = bestScore(f.id);
+    if (prev === null || correct > prev) store.set('quiz:' + f.id, correct);
+    renderProgress(); renderGrid(); renderHero();
+  }
+  renderQuiz();
+}
+
+/* ---------- collection ---------- */
+function renderGrid() {
+  const seen = new Set(store.get('seen', []));
+  document.querySelectorAll('#filters .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.f === state.filter)));
+  $('#grid').innerHTML = ORDER.map(id => BY_ID[id])
+    .filter(f => state.filter === 'All' || f.field === state.filter)
+    .map(f => {
+      const b = bestScore(f.id);
+      const status = b !== null ? `Quiz ${b}/${f.quiz.length}` : seen.has(f.id) ? 'Read' : 'Unread';
+      const done = b !== null && b >= 2;
+      return `<button class="card ${f.id === state.id ? 'current' : ''}" id="card-${f.id}" data-open="${f.id}">
+        <span class="tag ${f.field}" style="align-self:flex-start">${f.field}</span>
+        <span class="ttl">${esc(f.title)}</span>
+        <span class="foot"><span class="status ${done ? 'done' : ''}">${done ? '✓ ' : ''}${status}</span><span class="label">${f.id === TODAY_ID ? 'Today' : f.year}</span></span>
+      </button>`;
+    }).join('');
+}
+
+/* ---------- navigation ---------- */
+function open(id, opts = {}) {
+  if (!BY_ID[id]) return;
+  state.id = id;
+  state.tab = opts.tab || 'explore';
+  const seen = new Set(store.get('seen', []));
+  seen.add(id); store.set('seen', [...seen]);
+  renderHero(); renderPanel(); renderGrid();
+  if (opts.scroll) document.getElementById(opts.scroll).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, a');
+  if (!t) return;
+  if (t.id === 'home') { e.preventDefault(); open(TODAY_ID, { scroll: 'hero' }); return; }
+  if (t.dataset.open) { open(t.dataset.open, { scroll: 'hero' }); return; }
+  if (t.dataset.tab) { state.tab = t.dataset.tab; renderPanel(); return; }
+  if (t.dataset.q !== undefined) { answer(+t.dataset.q, +t.dataset.o); return; }
+  if (t.dataset.f) { state.filter = t.dataset.f; store.set('filter', state.filter); renderGrid(); return; }
+  if (t.dataset.angle) { const r = $('#phyllo-angle'); r.value = t.dataset.angle; drawPhyllo(); return; }
+  switch (t.id) {
+    case 'go-deep': open(state.id, { tab: 'explore', scroll: 'deep' }); break;
+    case 'go-quiz': open(state.id, { tab: 'quiz', scroll: 'deep' }); break;
+    case 'go-today': open(TODAY_ID, { scroll: 'hero' }); break;
+    case 'go-random': {
+      const pool = FACTS.filter(f => f.id !== state.id && (state.filter === 'All' || f.field === state.filter));
+      open(pool[Math.floor(Math.random() * pool.length)].id);
+      break;
+    }
+    case 'quiz-retake': state.answers[state.id] = []; renderQuiz(); break;
+    case 'lz-restart': initLorenz(); break;
+  }
+});
+
+/* ---------- canvas helpers ---------- */
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function setupCanvas(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+/* phyllotaxis */
+function initPhyllo() {
+  const r = $('#phyllo-angle');
+  r.addEventListener('input', drawPhyllo);
+  drawPhyllo();
+}
+function drawPhyllo() {
+  const c = $('#phyllo-canvas'); if (!c) return;
+  const angle = parseFloat($('#phyllo-angle').value);
+  $('#phyllo-out').textContent = angle.toFixed(2) + '°';
+  const { ctx, w, h } = setupCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+  const N = 700, scale = (w / 2 - 8) / Math.sqrt(N), rad = angle * Math.PI / 180;
+  const math = cssVar('--math'), ink = cssVar('--ink-2');
+  for (let n = 1; n <= N; n++) {
+    const rr = scale * Math.sqrt(n), th = n * rad;
+    ctx.beginPath();
+    ctx.arc(w / 2 + rr * Math.cos(th), h / 2 + rr * Math.sin(th), Math.max(1.6, scale * 0.42), 0, Math.PI * 2);
+    ctx.fillStyle = n % 21 === 0 ? ink : math;
+    ctx.globalAlpha = 0.35 + 0.65 * (n / N);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* lorenz */
+let lzRaf = null;
+function stopLorenz() { if (lzRaf) cancelAnimationFrame(lzRaf); lzRaf = null; }
+function lorenzStep(p, dt) {
+  const s = 10, r = 28, b = 8 / 3;
+  const f = ([x, y, z]) => [s * (y - x), x * (r - z) - y, x * y - b * z];
+  const k1 = f(p);
+  const k2 = f(p.map((v, i) => v + dt / 2 * k1[i]));
+  const k3 = f(p.map((v, i) => v + dt / 2 * k2[i]));
+  const k4 = f(p.map((v, i) => v + dt * k3[i]));
+  return p.map((v, i) => v + dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+}
+function initLorenz() {
+  stopLorenz();
+  const c = $('#lorenz-canvas'); if (!c) return;
+  const { ctx, w, h } = setupCanvas(c);
+  const dt = 0.008, steps = 5000;
+  const A = [[1, 1, 1]], B = [[1.00001, 1, 1]];
+  for (let i = 0; i < steps; i++) { A.push(lorenzStep(A[i], dt)); B.push(lorenzStep(B[i], dt)); }
+  const X = x => w / 2 + x / 24 * (w / 2 - 10);
+  const Z = z => h - 10 - z / 52 * (h - 20);
+  const cA = cssVar('--phys'), cB = cssVar('--math');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let i = reduce ? steps : 1;
+  function paint() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineWidth = 1.2;
+    [[A, cA], [B, cB]].forEach(([P, col]) => {
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.85; ctx.beginPath();
+      ctx.moveTo(X(P[0][0]), Z(P[0][2]));
+      for (let k = 1; k <= i; k++) ctx.lineTo(X(P[k][0]), Z(P[k][2]));
+      ctx.stroke();
+      ctx.globalAlpha = 1; ctx.fillStyle = col; ctx.beginPath();
+      ctx.arc(X(P[i][0]), Z(P[i][2]), 4, 0, Math.PI * 2); ctx.fill();
+    });
+    const d = Math.hypot(A[i][0] - B[i][0], A[i][1] - B[i][1], A[i][2] - B[i][2]);
+    $('#lz-t').textContent = (i * dt).toFixed(1);
+    $('#lz-d').textContent = d < 0.001 ? d.toExponential(1) : d.toFixed(2);
+    if (i < steps) { i = Math.min(steps, i + 12); lzRaf = requestAnimationFrame(paint); }
+  }
+  paint();
+}
+
+/* ---------- boot ---------- */
+recordVisit();
+renderProgress();
+tickCountdown();
+setInterval(tickCountdown, 30000);
+const hashId = (location.hash || '').slice(1);
+open(BY_ID[hashId] ? hashId : TODAY_ID);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.tab === 'math') renderPanel(); });
+</script>
+
+</body>
+</html>
